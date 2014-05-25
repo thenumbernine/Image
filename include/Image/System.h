@@ -19,10 +19,10 @@ public:
 	System() : baseIO(NULL) {}
 
 	//access to loading an image from our chain:
-	Image *load(const char *filename);
+	IImage *load(const char *filename);
 	
 	//save an image
-	void save(const Image *image, const char *filename);
+	void save(const IImage *image, const char *filename);
 };
 extern Singleton<System> sys;
 

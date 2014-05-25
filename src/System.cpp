@@ -17,7 +17,7 @@ static const char *extForFilename(const char *filename) {
 	return ext;
 }
 
-Image *System::load(const char *filename) {
+IImage *System::load(const char *filename) {
 	const char *ext = extForFilename(filename);
 
 	try {
@@ -31,7 +31,7 @@ Image *System::load(const char *filename) {
 	}
 }
 
-void System::save(const Image *img, const char *filename) {
+void System::save(const IImage *img, const char *filename) {
 	const char *ext = extForFilename(filename);
 
 	try {

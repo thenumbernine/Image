@@ -17,11 +17,11 @@ struct PPM_IO : public IO {
 	virtual bool supportsExt(const char *fileExt) {
 		return !strcasecmp(fileExt, "ppm");
 	}
-	virtual Image *load(const char *filename) {
+	virtual IImage *load(const char *filename) {
 	
 		FILE *file;
 		unsigned char *imgdata = NULL;
-		Image *img = NULL;
+		IImage *img = NULL;
 		
 		try {
 			
@@ -60,7 +60,7 @@ struct PPM_IO : public IO {
 				if (i >= size) break;
 			}
 
-			img = new ImageType<>(Vector<int,2>(w,h),imgdata);
+			img = new Image(Vector<int,2>(w,h),imgdata);
 		} catch (const exception &t) {
 			//finally
 			if (file) fclose(file);
@@ -72,7 +72,7 @@ struct PPM_IO : public IO {
 		assert(img);
 		return img;
 	}
-	virtual void save(const Image *img, const char *filename) {
+	virtual void save(const IImage *img, const char *filename) {
 		throw Exception() << "not implemented yet";
 	}
 };

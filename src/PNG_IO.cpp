@@ -16,8 +16,8 @@ struct PNG_IO : public IO {
 	virtual ~PNG_IO(){}
 	virtual const char *name() { return "PNG_IO"; }
 	virtual bool supportsExt(const char *fileExt);
-	virtual Image *load(const char *filename);
-	virtual void save(const Image *img, const char *filename);
+	virtual IImage *load(const char *filename);
+	virtual void save(const IImage *img, const char *filename);
 };
 
 using namespace std;
@@ -48,14 +48,14 @@ bool PNG_IO::supportsExt(const char *fileExt) {
 	return !strcasecmp(fileExt, "png");
 }
 
-Image *PNG_IO::load(const char *filename) {	
+IImage *PNG_IO::load(const char *filename) {	
 	FILE *fp = NULL;
 	png_structp png_ptr = NULL;
 	png_infop info_ptr = NULL;
 	png_infop end_info = NULL;
 	png_bytep row_buf = NULL;
 	unsigned char *imgdata = NULL;
-	Image *img = NULL;
+	IImage *img = NULL;
 	
 	try {
 		if (!(fp = fopen(filename, "rb"))) throw Exception() << "couldn't open file " << filename;
@@ -116,7 +116,7 @@ Image *PNG_IO::load(const char *filename) {
 		png_read_end(png_ptr, end_info);
 		
 		//img's existence signifies that we've made it
-		img = new ImageType<>(Vector<int,2>(width, height), imgdata, bytespp);
+		img = new Image(Vector<int,2>(width, height), imgdata, bytespp);
 	} catch (const exception &t) {
 		//finally
 		if (row_buf) png_free(png_ptr, row_buf);
@@ -135,7 +135,7 @@ Image *PNG_IO::load(const char *filename) {
 	return img;
 }
 
-void PNG_IO::save(const Image *img, const char *filename) {
+void PNG_IO::save(const IImage *img, const char *filename) {
 
 	FILE *fp = NULL;
 	png_structp png_ptr = NULL;

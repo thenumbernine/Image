@@ -17,12 +17,12 @@ struct TGA_IO : public IO {
 	virtual bool supportsExt(const char *fileExt) {
 		return !strcasecmp(fileExt, "tga");
 	}
-	virtual Image *load(const char *filename) {
+	virtual IImage *load(const char *filename) {
 		FILE *file = NULL;
 		unsigned char *colorMap = NULL;
 		unsigned char *data = NULL;
 		unsigned char *imgdata = NULL;
-		Image *img = NULL;
+		IImage *img = NULL;
 		
 		try {
 			//open the file
@@ -121,7 +121,7 @@ struct TGA_IO : public IO {
 			}
 		
 			if (bitsPerPixel & 7) throw Exception() << "unsupported bits per pixel " << bitsPerPixel;
-			img = new ImageType<>(Vector<int,2>(width, height), imgdata, bitsPerPixel >> 3);
+			img = new Image(Vector<int,2>(width, height), imgdata, bitsPerPixel >> 3);
 		} catch (const exception &t) {
 			//finally
 			if (file) fclose(file);
@@ -137,7 +137,7 @@ struct TGA_IO : public IO {
 		assert(img);
 		return img;
 	}
-	virtual void save(const Image *img, const char *filename) {
+	virtual void save(const IImage *img, const char *filename) {
 		throw Exception() << "not implemented yet";
 	}
 };

@@ -21,8 +21,8 @@ struct FITS_IO : public IO {
 	virtual ~FITS_IO() {}
 	virtual const char *name() { return "FITS_IO"; }
 	virtual bool supportsExt(const char *fileExt);
-	virtual Image *load(const char *filename);
-	virtual void save(const Image *img, const char *filename);
+	virtual IImage *load(const char *filename);
+	virtual void save(const IImage *img, const char *filename);
 };
 
 using namespace std;
@@ -31,7 +31,7 @@ bool FITS_IO::supportsExt(const char *fileExt) {
 	return !strcasecmp(fileExt, "fits");
 }
 
-Image *FITS_IO::load(const char *filename) {
+IImage *FITS_IO::load(const char *filename) {
 	fitsfile *fitsFilePtr;
 	int status = 0;
 	ffopen(&fitsFilePtr, filename, READONLY, &status);
@@ -91,7 +91,7 @@ Image *FITS_IO::load(const char *filename) {
 	ffgpxv(fitsFilePtr, imgType, fpixel, numPixels, NULL, data, NULL, &status);
 	if (status) throw Exception() << "ffgpxv failed with " << status;
 	
-	Image *img;
+	IImage *img;
 	switch (bitPixType) {
 	case BYTE_IMG:
 		switch (channels) {
@@ -148,7 +148,7 @@ Image *FITS_IO::load(const char *filename) {
 	return img;
 }
 
-static void saveType(const Image *img, const char *filename, int imgType, int bitPixType, int DIM) {
+static void saveType(const IImage *img, const char *filename, int imgType, int bitPixType, int DIM) {
 
 	FILE *file = fopen(filename, "r");
 	if (file) {
@@ -185,7 +185,7 @@ static void saveType(const Image *img, const char *filename, int imgType, int bi
 but all we have is channel size, not type ...
 time to dynamic-cast and find the right type ...
 */
-void FITS_IO::save(const Image *img, const char *filename) {
+void FITS_IO::save(const IImage *img, const char *filename) {
 #define CHECK_SAVE_TYPE(T, imgType, bitPixType, DIM)	\
 	{	\
 		const ImageType<T> *img_ = dynamic_cast<const ImageType<T>*>(img);	\

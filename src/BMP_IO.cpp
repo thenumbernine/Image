@@ -41,11 +41,11 @@ struct BMP_IO : public IO {
 	virtual bool supportsExt(const char *fileExt) {
 		return !strcasecmp(fileExt, "bmp");
 	}
-	virtual Image *load(const char *filename) {
+	virtual IImage *load(const char *filename) {
 
 		//list out resources we have to free here:
 		unsigned char *imgdata = NULL;
-		Image *img = NULL;
+		IImage *img = NULL;
 		try {
 			ifstream f(filename, ios::binary);
 			if (!f.is_open()) throw Exception() << "failed to open file for reading";
@@ -99,7 +99,7 @@ struct BMP_IO : public IO {
 			}
 			
 			//do this last so img == null if anything goes wrong
-			img = new ImageType<>(
+			img = new Image(
 				Vector<int,2>(hdr.width, height),	//size
 				imgdata,							//data
 				hdr.bitsPerPixel >> 3);				//channels
@@ -112,7 +112,7 @@ struct BMP_IO : public IO {
 		assert(img);
 		return img;		
 	}
-	virtual void save(const Image *img, const char *filename) {
+	virtual void save(const IImage *img, const char *filename) {
 		try {
 			if (img->getBitsPerPixel() < 24) throw Exception() << "don't support writing for " << img->getBitsPerPixel() << " bits per pixel yet";
 

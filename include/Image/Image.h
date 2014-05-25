@@ -7,7 +7,8 @@
 
 namespace Image {
 
-struct Image {
+//image interface
+struct IImage {
 	virtual Vector<int,2> getSize() const = 0;
 	virtual int getChannels() const = 0;
 	virtual int getBitsPerPixel() const { return getChannels() << 3; }
@@ -16,7 +17,7 @@ struct Image {
 };
 
 template<typename Type_ = char>
-struct ImageType : public Image {
+struct ImageType : public IImage {
 	typedef Type_ Type;
 protected:
 	Vector<int,3> size;	//width, height, channels
@@ -51,6 +52,8 @@ public:
 	virtual Type *getDataType() { return grid->v; }
 	virtual const Type *getDataType() const { return grid->v; }
 };
+
+typedef struct ImageType<> Image;
 
 };
 

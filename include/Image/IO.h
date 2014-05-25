@@ -38,11 +38,11 @@ public:
 	//returns the image in the file.
 	//throws an exception if it fails
 	//if it returns, you should be able to assert the image and its data exist
-	virtual Image *load(const char *filename) = 0;
+	virtual IImage *load(const char *filename) = 0;
 	
 	//saves the image to the specified file
 	//throws an exception if it fails
-	virtual void save(const Image *img, const char *filename) = 0;
+	virtual void save(const IImage *img, const char *filename) = 0;
 };
 
 };

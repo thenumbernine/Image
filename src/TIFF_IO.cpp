@@ -18,8 +18,8 @@ struct TIFF_IO : public IO {
 	virtual ~TIFF_IO(){}
 	virtual const char *name(void) { return "TIFF_IO"; }
 	virtual bool supportsExt(const char *fileExt);
-	virtual Image *load(const char *filename);
-	virtual void save(const Image *img, const char *filename);
+	virtual IImage *load(const char *filename);
+	virtual void save(const IImage *img, const char *filename);
 };
 
 using namespace std;
@@ -29,10 +29,10 @@ bool TIFF_IO::supportsExt(const char *fileExt) {
 		|| !strcasecmp(fileExt, "tiff");
 }
 
-Image *TIFF_IO::load(const char *filename) {
+IImage *TIFF_IO::load(const char *filename) {
 	TIFF *in = NULL;
 	unsigned char *imgdata = NULL;
-	Image *img = NULL;
+	IImage *img = NULL;
 	
 	try {
 		if (!(in = TIFFOpen(filename, "r"))) throw Exception() << " couldn't open file " << filename;
@@ -65,7 +65,7 @@ Image *TIFF_IO::load(const char *filename) {
 			}
 		}
 		//img's existence signifies that we've made it
-		img = new ImageType<>(Vector<int,2>(width, height), imgdata, bytespp);
+		img = new Image(Vector<int,2>(width, height), imgdata, bytespp);
 	} catch (const exception &t) {
 		//finally
 		if (in) TIFFClose(in);
@@ -79,7 +79,7 @@ Image *TIFF_IO::load(const char *filename) {
 	return img;
 }
 
-void TIFF_IO::save(const Image *img, const char *filename) {
+void TIFF_IO::save(const IImage *img, const char *filename) {
 	throw Exception() << "not implemented yet";
 }
 
