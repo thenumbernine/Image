@@ -22,13 +22,13 @@ struct JPEG_IO : public IO {
 	virtual ~JPEG_IO(){}
 	virtual const char *name() { return "JPEG_IO"; }
 	virtual bool supportsExt(const char *fileExt);
-	virtual Image *load(const char *filename);
-	virtual void save(const Image *img, const char *filename);
+	virtual IImage *load(const char *filename);
+	virtual void save(const IImage *img, const char *filename);
 
 #ifndef WIN32
 	//special-case for this loader
 	//useful when you download a jpeg and dont want to save it to disk to load it again
-	Image *loadFromMemory(const char *buffer, size_t size);
+	IImage *loadFromMemory(const char *buffer, size_t size);
 #endif
 };
 
@@ -68,14 +68,14 @@ bool JPEG_IO::supportsExt(const char *fileExt) {
 		|| !strcasecmp(fileExt, "jpg");
 }
 
-Image *JPEG_IO::load(const char *filename) {
+IImage *JPEG_IO::load(const char *filename) {
 	
 	FILE *fp = NULL;
 	struct jpeg_decompress_struct cinfo;
 	bool cinfo_init = false;
 	struct my_error_mgr jerr;
 	unsigned char *imgdata = NULL;
-	Image *img = NULL;
+	IImage *img = NULL;
 
 	try {
 		if (!(fp = fopen(filename, "rb"))) throw Exception() << "couldn't open file " << filename;
@@ -104,7 +104,7 @@ Image *JPEG_IO::load(const char *filename) {
 		jpeg_finish_decompress(&cinfo);
 		
 		//img's existence signifies that we've made it
-		img = new ImageType<>(Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
+		img = new Image(Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
 
 	} catch (const exception &t) {
 		//finally code
@@ -123,7 +123,7 @@ Image *JPEG_IO::load(const char *filename) {
 	return img;
 }
 
-void JPEG_IO::save(const Image *img, const char *filename) {
+void JPEG_IO::save(const IImage *img, const char *filename) {
 	throw Exception() << "not implemented yet";
 }
 
@@ -132,13 +132,13 @@ void JPEG_IO::save(const Image *img, const char *filename) {
 //if i really wanted i could abstract this to combine with the above code
 //but the above seems to use libjpeg stuff made just for file loading
 //COMMIT THIS TO MEMORY
-Image *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
+IImage *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
 	
 	struct jpeg_decompress_struct cinfo;
 	bool cinfo_init = false;
 	struct my_error_mgr jerr;
 	unsigned char *imgdata = NULL;
-	Image *img = NULL;
+	IImage *img = NULL;
 
 	try {
 		cinfo.err = jpeg_std_error(&jerr.pub);
@@ -272,7 +272,7 @@ Image *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
 		jpeg_finish_decompress(&cinfo);
 		
 		//img's existence signifies that we've made it
-		img = new ImageType<>(Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
+		img = new Image(Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
 
 	} catch (const exception &t) {
 		//finally code
