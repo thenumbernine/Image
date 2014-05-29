@@ -3,4 +3,5 @@ DIST_TYPE=dylib
 
 include ../GLApp/Makefile.mk
 
-CFLAGS_BASE+= -I../GLApp/include -I../TensorMath/include
+INCLUDE_BASE+=../GLApp/include
+INCLUDE_BASE+=../TensorMath/include
