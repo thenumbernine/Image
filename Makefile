@@ -1,5 +1,5 @@
-DIST_FILENAME=libImage.dylib
-DIST_TYPE=dylib
+DIST_FILENAME=Image
+DIST_TYPE=lib
 
 include ../GLApp/Makefile.mk
 
