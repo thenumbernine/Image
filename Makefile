@@ -1,7 +1,4 @@
 DIST_FILENAME=Image
 DIST_TYPE=lib
-
-include ../GLApp/Makefile.mk
-
-INCLUDE+=../GLApp/include
-INCLUDE+=../TensorMath/include
+include ../Common/Base.mk
+include ../TensorMath/Include.mk

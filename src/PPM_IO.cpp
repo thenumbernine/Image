@@ -7,6 +7,7 @@
 #define strcasecmp _stricmp
 #endif
 
+using namespace Common;
 using namespace std;
 
 namespace Image {

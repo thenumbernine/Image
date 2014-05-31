@@ -11,13 +11,13 @@ namespace Image {
  * Intertwined within it - through static methods - is access to the loader system
  */
 class IO {
-	friend class Singleton<IO>;	//so only the singleton can instanciate this
+	friend class Common::Singleton<IO>;	//so only the singleton can instanciate this
 	friend class System;
 	
 	//the image loader chain:
 	IO *next;
 
-	IO(const char &) { throw Exception() << "no copy constructors for singletons!"; }
+	IO(const char &) { throw Common::Exception() << "no copy constructors for singletons!"; }
 
 protected:
 	//attach yerself to the chain!

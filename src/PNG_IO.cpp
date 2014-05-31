@@ -10,6 +10,8 @@
 
 //http://zarb.org/~gc/html/libpng.html
 
+using namespace Common;
+
 namespace Image {
 
 struct PNG_IO : public IO {

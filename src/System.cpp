@@ -1,5 +1,6 @@
 #include "Image/System.h"
 
+using namespace Common;
 using namespace std;
 
 namespace Image {

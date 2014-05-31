@@ -24,7 +24,7 @@ public:
 	//save an image
 	void save(const IImage *image, const char *filename);
 };
-extern Singleton<System> sys;
+extern Common::Singleton<System> sys;
 
 };
 

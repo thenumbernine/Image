@@ -12,6 +12,8 @@
 #define strcasecmp _stricmp
 #endif
 
+using namespace Common;
+
 namespace Image {
 
 struct TIFF_IO : public IO {

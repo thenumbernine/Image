@@ -15,6 +15,8 @@ extern "C" {
 #define strcasecmp _stricmp
 #endif
 
+using namespace Common;
+
 namespace Image {
 
 struct FITS_IO : public IO {
