@@ -1,15 +1,15 @@
 #pragma once
 
-#include "TensorMath/Meta.h"
-#include "TensorMath/Grid.h"
-#include "TensorMath/Vector.h"
+#include "Tensor/Grid.h"
+#include "Tensor/Vector.h"
+#include "Common/Meta.h"
 #include <type_traits>
 
 namespace Image {
 
 //image interface
 struct IImage {
-	virtual Vector<int,2> getSize() const = 0;
+	virtual Tensor::Vector<int,2> getSize() const = 0;
 	virtual int getChannels() const = 0;
 	virtual int getBitsPerPixel() const { return getChannels() << 3; }
 	virtual char *getData() = 0;
@@ -20,13 +20,13 @@ template<typename Type_ = char>
 struct ImageType : public IImage {
 	typedef Type_ Type;
 protected:
-	Vector<int,3> size;	//width, height, channels
+	Tensor::Vector<int,3> size;	//width, height, channels
 
-	typedef ::Grid<Type, 3> Grid;
+	typedef Tensor::Grid<Type, 3> Grid;
 	Grid *grid;
 
 public:
-	ImageType(const Vector<int,2> size_, void *data = NULL, int channels = 3) 
+	ImageType(const Tensor::Vector<int,2> size_, void *data = NULL, int channels = 3) 
 	: grid(NULL)
 	{
 		size(0) = size_(0);
@@ -43,7 +43,7 @@ public:
 		delete grid;
 	}
 
-	virtual Vector<int,2> getSize() const { return Vector<int,2>(size(0), size(1)); }
+	virtual Tensor::Vector<int,2> getSize() const { return Tensor::Vector<int,2>(size(0), size(1)); }
 	virtual int getChannels() const { return size(2); }
 	virtual int getBitsPerPixel() const { return getChannels() * sizeof(Type); }
 	

@@ -1,7 +1,7 @@
 #include "Common/Exception.h"
 #include "Image/IO.h"
 
-#include "TensorMath/Vector.h"
+#include "Tensor/Vector.h"
 
 #define __CINT__
 extern "C" {
@@ -85,7 +85,7 @@ IImage *FITS_IO::load(const char *filename) {
 	if (status) throw Exception() << "ffgisz failed with " << status;
 	int width = sizes[0];
 	int height = sizes[1];
-	Vector<int,2> size(width,height);
+	Tensor::Vector<int,2> size(width,height);
 	int channels = sizes[2];
 	
 	int numPixels = width * height * channels;
@@ -98,8 +98,8 @@ IImage *FITS_IO::load(const char *filename) {
 	case BYTE_IMG:
 		switch (channels) {
 		case 1: img = new ImageType<char>(size); break;
-		case 2: img = new ImageType<Vector<char,2>>(size); break;
-		case 3: img = new ImageType<Vector<char,3>>(size); break;
+		case 2: img = new ImageType<Tensor::Vector<char,2>>(size); break;
+		case 3: img = new ImageType<Tensor::Vector<char,3>>(size); break;
 		default:
 			throw Exception() << "unsupported channels for byte type: " << channels;
 		}
@@ -107,8 +107,8 @@ IImage *FITS_IO::load(const char *filename) {
 	case SHORT_IMG:
 		switch (channels) {
 		case 1: img = new ImageType<short>(size); break;
-		case 2: img = new ImageType<Vector<short,2>>(size); break;
-		case 3: img = new ImageType<Vector<short,3>>(size); break;
+		case 2: img = new ImageType<Tensor::Vector<short,2>>(size); break;
+		case 3: img = new ImageType<Tensor::Vector<short,3>>(size); break;
 		default:
 			throw Exception() << "unsupported channels for short type: " << channels;
 		}
@@ -116,8 +116,8 @@ IImage *FITS_IO::load(const char *filename) {
 	case LONG_IMG:
 		switch (channels) {
 		case 1: img = new ImageType<int>(size); break;
-		case 2: img = new ImageType<Vector<int,2>>(size); break;
-		case 3: img = new ImageType<Vector<int,3>>(size); break;
+		case 2: img = new ImageType<Tensor::Vector<int,2>>(size); break;
+		case 3: img = new ImageType<Tensor::Vector<int,3>>(size); break;
 		default:
 			throw Exception() << "unsupported channels for int type: " << channels;
 		}
@@ -125,8 +125,8 @@ IImage *FITS_IO::load(const char *filename) {
 	case FLOAT_IMG:
 		switch (channels) {
 		case 1: img = new ImageType<float>(size); break;
-		case 2: img = new ImageType<Vector<float,2>>(size); break;
-		case 3: img = new ImageType<Vector<float,3>>(size); break;
+		case 2: img = new ImageType<Tensor::Vector<float,2>>(size); break;
+		case 3: img = new ImageType<Tensor::Vector<float,3>>(size); break;
 		default:
 			throw Exception() << "unsupported channels for float type: " << channels;
 		}
@@ -134,8 +134,8 @@ IImage *FITS_IO::load(const char *filename) {
 	case DOUBLE_IMG:
 		switch (channels) {
 		case 1: img = new ImageType<double>(size); break;
-		case 2: img = new ImageType<Vector<double,2>>(size); break;
-		case 3: img = new ImageType<Vector<double,3>>(size); break;
+		case 2: img = new ImageType<Tensor::Vector<double,2>>(size); break;
+		case 3: img = new ImageType<Tensor::Vector<double,3>>(size); break;
 		default:
 			throw Exception() << "unsupported channels for double type: " << channels;
 		}
@@ -198,20 +198,20 @@ void FITS_IO::save(const IImage *img, const char *filename) {
 	}
 #define COMMA ,
 	CHECK_SAVE_TYPE(char, TBYTE, BYTE_IMG, 1)
-	CHECK_SAVE_TYPE(Vector<char COMMA 2>, TBYTE, BYTE_IMG, 2)
-	CHECK_SAVE_TYPE(Vector<char COMMA 3>, TBYTE, BYTE_IMG, 3)
+	CHECK_SAVE_TYPE(Tensor::Vector<char COMMA 2>, TBYTE, BYTE_IMG, 2)
+	CHECK_SAVE_TYPE(Tensor::Vector<char COMMA 3>, TBYTE, BYTE_IMG, 3)
 	CHECK_SAVE_TYPE(short, TSHORT, SHORT_IMG, 1)
-	CHECK_SAVE_TYPE(Vector<short COMMA 2>, TSHORT, SHORT_IMG, 2)
-	CHECK_SAVE_TYPE(Vector<short COMMA 3>, TSHORT, SHORT_IMG, 3)
+	CHECK_SAVE_TYPE(Tensor::Vector<short COMMA 2>, TSHORT, SHORT_IMG, 2)
+	CHECK_SAVE_TYPE(Tensor::Vector<short COMMA 3>, TSHORT, SHORT_IMG, 3)
 	CHECK_SAVE_TYPE(int, TLONG, LONG_IMG, 1)
-	CHECK_SAVE_TYPE(Vector<int COMMA 2>, TLONG, LONG_IMG, 2)
-	CHECK_SAVE_TYPE(Vector<int COMMA 3>, TLONG, LONG_IMG, 3)
+	CHECK_SAVE_TYPE(Tensor::Vector<int COMMA 2>, TLONG, LONG_IMG, 2)
+	CHECK_SAVE_TYPE(Tensor::Vector<int COMMA 3>, TLONG, LONG_IMG, 3)
 	CHECK_SAVE_TYPE(float, TFLOAT, FLOAT_IMG, 1)
-	CHECK_SAVE_TYPE(Vector<float COMMA 2>, TFLOAT, FLOAT_IMG, 2)
-	CHECK_SAVE_TYPE(Vector<float COMMA 3>, TFLOAT, FLOAT_IMG, 3)
+	CHECK_SAVE_TYPE(Tensor::Vector<float COMMA 2>, TFLOAT, FLOAT_IMG, 2)
+	CHECK_SAVE_TYPE(Tensor::Vector<float COMMA 3>, TFLOAT, FLOAT_IMG, 3)
 	CHECK_SAVE_TYPE(double, TDOUBLE, DOUBLE_IMG, 1)
-	CHECK_SAVE_TYPE(Vector<double COMMA 2>, TDOUBLE, DOUBLE_IMG, 2)
-	CHECK_SAVE_TYPE(Vector<double COMMA 3>, TDOUBLE, DOUBLE_IMG, 3)
+	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 2>, TDOUBLE, DOUBLE_IMG, 2)
+	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 3>, TDOUBLE, DOUBLE_IMG, 3)
 	
 	throw Exception() << "failed to find RTTI for image";
 }

@@ -67,7 +67,7 @@ IImage *TIFF_IO::load(const char *filename) {
 			}
 		}
 		//img's existence signifies that we've made it
-		img = new Image(Vector<int,2>(width, height), imgdata, bytespp);
+		img = new Image(Tensor::Vector<int,2>(width, height), imgdata, bytespp);
 	} catch (const exception &t) {
 		//finally
 		if (in) TIFFClose(in);

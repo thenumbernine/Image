@@ -122,7 +122,7 @@ struct TGA_IO : public IO {
 			}
 		
 			if (bitsPerPixel & 7) throw Exception() << "unsupported bits per pixel " << bitsPerPixel;
-			img = new Image(Vector<int,2>(width, height), imgdata, bitsPerPixel >> 3);
+			img = new Image(Tensor::Vector<int,2>(width, height), imgdata, bitsPerPixel >> 3);
 		} catch (const exception &t) {
 			//finally
 			if (file) fclose(file);

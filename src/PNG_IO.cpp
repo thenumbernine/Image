@@ -118,7 +118,7 @@ IImage *PNG_IO::load(const char *filename) {
 		png_read_end(png_ptr, end_info);
 		
 		//img's existence signifies that we've made it
-		img = new Image(Vector<int,2>(width, height), imgdata, bytespp);
+		img = new Image(Tensor::Vector<int,2>(width, height), imgdata, bytespp);
 	} catch (const exception &t) {
 		//finally
 		if (row_buf) png_free(png_ptr, row_buf);

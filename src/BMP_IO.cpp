@@ -101,7 +101,7 @@ struct BMP_IO : public IO {
 			
 			//do this last so img == null if anything goes wrong
 			img = new Image(
-				Vector<int,2>(hdr.width, height),	//size
+				Tensor::Vector<int,2>(hdr.width, height),	//size
 				imgdata,							//data
 				hdr.bitsPerPixel >> 3);				//channels
 		} catch (const exception &t) {

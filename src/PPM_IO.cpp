@@ -61,7 +61,7 @@ struct PPM_IO : public IO {
 				if (i >= size) break;
 			}
 
-			img = new Image(Vector<int,2>(w,h),imgdata);
+			img = new Image(Tensor::Vector<int,2>(w,h),imgdata);
 		} catch (const exception &t) {
 			//finally
 			if (file) fclose(file);

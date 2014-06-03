@@ -106,7 +106,7 @@ IImage *JPEG_IO::load(const char *filename) {
 		jpeg_finish_decompress(&cinfo);
 		
 		//img's existence signifies that we've made it
-		img = new Image(Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
+		img = new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
 
 	} catch (const exception &t) {
 		//finally code
@@ -274,7 +274,7 @@ IImage *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
 		jpeg_finish_decompress(&cinfo);
 		
 		//img's existence signifies that we've made it
-		img = new Image(Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
+		img = new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
 
 	} catch (const exception &t) {
 		//finally code
