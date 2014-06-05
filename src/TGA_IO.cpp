@@ -1,40 +1,34 @@
+#include "Image/IO.h"
+#include "Common/Exception.h"
+#include <fstream>
+#include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Common/Exception.h"
-#include "Image/IO.h"
 
 #ifdef WIN32
 #define strcasecmp _stricmp
 #endif
 
-using namespace Common;
-using namespace std;
-
 namespace Image {
 
 struct TGA_IO : public IO {
 	virtual ~TGA_IO(){}
-	virtual const char *name() { return "TGA_IO"; }
-	virtual bool supportsExt(const char *fileExt) {
-		return !strcasecmp(fileExt, "tga");
+	virtual std::string name() { return "TGA_IO"; }
+	virtual bool supportsExtension(std::string extension) {
+		return !strcasecmp(extension.c_str(), "tga");
 	}
-	virtual IImage *load(const char *filename) {
-		FILE *file = NULL;
-		unsigned char *colorMap = NULL;
-		unsigned char *data = NULL;
-		unsigned char *imgdata = NULL;
-		IImage *img = NULL;
-		
+	virtual IImage *read(std::string filename) {
 		try {
-			//open the file
-			file = fopen(filename, "rb");
-			if (!file) throw Exception() << "unable to open file";
+			std::ifstream file(filename, std::ios::binary);
+			if (!file) throw Common::Exception() << "unable to open file";
 
-			unsigned char header[18];
-			if (fread(header,1,sizeof(header),file) != sizeof(header)) throw Exception() << "couldnt read header";
-			if (fseek(file, header[0], SEEK_CUR)) throw Exception() << "error trying to seek past image ID info";
+			char header[18];
+			
+			if (!file.read(header, sizeof(header))) throw Common::Exception() << "couldnt read header";
+			if (!file.seekg(header[0], std::ios::cur)) throw Common::Exception() << "error trying to seek past image ID info";
 
 			//indexed color stuff:
+			std::vector<char> colorMap;
 			if (header[1]) {		//a color map is present - lets read it
 				int colorMapCount = *(unsigned short*)(&header[5]);
 				int colorMapBits = header[7];
@@ -42,12 +36,12 @@ struct TGA_IO : public IO {
 				//my way of rounding up - base 8
 				int colorMapBytes = (colorMapBits>>3) + !!(colorMapBits & 7);
 
-				colorMap = new unsigned char[colorMapCount * colorMapBytes];
+				colorMap.resize(colorMapCount * colorMapBytes);
 			}
 
 	//		int imageType = header[2] & 7;
 			int RLEcompressed = header[2] & 8;
-			if (RLEcompressed) throw Exception() << "this TGA file just happens to be RLE, which I dont support yet";
+			if (RLEcompressed) throw Common::Exception() << "this TGA file just happens to be RLE, which I dont support yet";
 
 			unsigned short width = *(unsigned short*)(&header[12]);
 			unsigned short height = *(unsigned short *)(&header[14]);
@@ -63,53 +57,48 @@ struct TGA_IO : public IO {
 			//if (header[17] & 0x10) flags |= TF_FLIP_X;		//horizontal flip
 
 			if(bitsPerPixel != 8 && bitsPerPixel !=24 && bitsPerPixel!=32) {
-				throw Exception() <<"This TGA is not of either 8, 24, or 32 bits per pixel";
+				throw Common::Exception() <<"This TGA is not of either 8, 24, or 32 bits per pixel";
 			}
 
 			unsigned int imageSize = width * height * bytes_per_pixel;
 
-			data = new unsigned char[imageSize];
-
-		//	for(temp=0; temp<(int)imageSize; temp++) data[temp]=0;
+			std::vector<char> data(imageSize);
 
 			unsigned int rowSize	= width * src_bytesPerPixel;
 
-			unsigned char *rowPtr = data;
+			char *rowPtr = &data[0];
 			int x;
 			for (int y = 0; y < (int)height; y++) {
 				if (bitsPerPixel == 8) {
-					unsigned char t;
+					char t;
 					for (x = 0; x < (int)width; x++) {
-						if (fread(&t, 1, 1, file) != 1) throw Exception() << "error in reading this TGA";
+						if (!file.read(&t, 1) != 1) throw Common::Exception() << "error in reading this TGA";
 
 						if (header[1] == 0 && header[2] == 3) {	//greyscale 8bit image
 							rowPtr[2] = rowPtr[1] = rowPtr[0] = t;
 						} else if (header[1] == 1 && header[2] == 1) {
-							if (!colorMap) throw Exception() << "colormap hasnt been found";
-							memcpy(rowPtr, colorMap+(t*3), src_bytesPerPixel);
+							if (!colorMap.size()) throw Common::Exception() << "colormap hasnt been found";
+							memcpy(rowPtr, &colorMap[t*3], src_bytesPerPixel);
 						}
 
 						rowPtr += src_bytesPerPixel;
 					}
 				} else { //24, 32
-					if (fread(rowPtr, 1, rowSize, file) != rowSize) throw Exception() << "couldnt read texture row";
+					if (!file.read(rowPtr, rowSize)) throw Common::Exception() << "couldnt read texture row";
 					rowPtr += rowSize;
 				}
 			}
 
-			fclose (file);
-			file = NULL;
-
 			int imgsize = rowSize * height;
-			imgdata = new unsigned char[imgsize];
+			std::vector<unsigned char> imgdata(imgsize);
 
 			//now read it through - getting rid of the row spacing
-			unsigned char *srcptr = data;	//reset the src ptr to the data start
-			unsigned char *dstptr = imgdata;
+			char *srcptr = &data[0];	//reset the src ptr to the data start
+			unsigned char *dstptr = &imgdata[0];
 			for (int row = 0; row < height; row++) {
 				//swap rows as we go =) bitmaps are upside-down
 				if (flip_y) {
-					dstptr = imgdata + (height - row - 1) * rowSize;
+					dstptr = &imgdata[(height - row - 1) * rowSize];
 				}
 				//swap red and blue as we go =)
 				for (int col = 0; col < width; col++, srcptr += src_bytesPerPixel, dstptr += src_bytesPerPixel) {
@@ -121,27 +110,18 @@ struct TGA_IO : public IO {
 				}
 			}
 		
-			if (bitsPerPixel & 7) throw Exception() << "unsupported bits per pixel " << bitsPerPixel;
-			img = new Image(Tensor::Vector<int,2>(width, height), imgdata, bitsPerPixel >> 3);
-		} catch (const exception &t) {
+			if (bitsPerPixel & 7) throw Common::Exception() << "unsupported bits per pixel " << bitsPerPixel;
+			return new Image(Tensor::Vector<int,2>(width, height), &imgdata[0], bitsPerPixel >> 3);
+		} catch (const std::exception &t) {
 			//finally
-			if (file) fclose(file);
-			delete[] colorMap;
-			delete[] data;
 			//all else
-			delete[] imgdata;
-			throw Exception() << "TGA_IO::load(" << filename << ") error: " << t.what();
+			throw Common::Exception() << "TGA_IO::read(" << filename << ") error: " << t.what();
 		}
-		if (file) fclose(file);
-		delete[] colorMap;
-		delete[] data;
-		assert(img);
-		return img;
 	}
-	virtual void save(const IImage *img, const char *filename) {
-		throw Exception() << "not implemented yet";
+	virtual void write(std::string filename, const IImage *img) {
+		throw Common::Exception() << "not implemented yet";
 	}
 };
-static Singleton<TGA_IO> tgaIO;
+static Common::Singleton<TGA_IO> tgaIO;
 
 };

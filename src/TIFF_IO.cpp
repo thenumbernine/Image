@@ -1,12 +1,10 @@
-#ifndef WIN32
-#include <stdlib.h>
-
+#include "Image/IO.h"
+#include "Common/Exception.h"
+#include "Common/Finally.h"
 #include <tiff.h>
 #include <tiffio.h>
-
-#include "Common/Exception.h"
-
-#include "Image/IO.h"
+#include <stdlib.h>
+#include <vector>
 
 #ifdef WIN32
 #define strcasecmp _stricmp
@@ -18,46 +16,44 @@ namespace Image {
 
 struct TIFF_IO : public IO {
 	virtual ~TIFF_IO(){}
-	virtual const char *name(void) { return "TIFF_IO"; }
-	virtual bool supportsExt(const char *fileExt);
-	virtual IImage *load(const char *filename);
-	virtual void save(const IImage *img, const char *filename);
+	virtual std::string name(void) { return "TIFF_IO"; }
+	virtual bool supportsExtension(std::string extension);
+	virtual IImage *read(std::string filename);
+	virtual void write(std::string filename, const IImage *img);
 };
 
 using namespace std;
 
-bool TIFF_IO::supportsExt(const char *fileExt) {
-	return !strcasecmp(fileExt, "tif")
-		|| !strcasecmp(fileExt, "tiff");
+bool TIFF_IO::supportsExtension(std::string extension) {
+	return !strcasecmp(extension.c_str(), "tif")
+		|| !strcasecmp(extension.c_str(), "tiff");
 }
 
-IImage *TIFF_IO::load(const char *filename) {
-	TIFF *in = NULL;
-	unsigned char *imgdata = NULL;
-	IImage *img = NULL;
-	
+IImage *TIFF_IO::read(std::string filename) {
 	try {
-		if (!(in = TIFFOpen(filename, "r"))) throw Exception() << " couldn't open file " << filename;
+		TIFF *tiff = TIFFOpen(filename.c_str(), "r");
+		if (!tiff) throw Exception() << " couldn't open file " << filename;
+		Common::Finally tiffFinally([&](){ TIFFClose(tiff); });
 
 		uint32 width = 0;
 		uint32 height = 0;
 		uint32 bytespp = 0;
-		TIFFGetField(in, TIFFTAG_IMAGEWIDTH, &width);
-		TIFFGetField(in, TIFFTAG_IMAGELENGTH, &height);
-		TIFFGetField(in, TIFFTAG_SAMPLESPERPIXEL, &bytespp);
+		TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
+		TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
+		TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &bytespp);
 		
 		//alloc 4 bytes per pixel in the img data because tiff decodes to rgba, no questions asked
 		//from there we can decide whether we need the alpha component
-		imgdata = new unsigned char[height * width * 4];
+		std::vector<unsigned char> imgdata(height * width * 4);
 		
-		if (!TIFFReadRGBAImageOriented(in, width, height, (uint32*)imgdata, ORIENTATION_TOPLEFT, 0)) {
+		if (!TIFFReadRGBAImageOriented(tiff, width, height, (uint32*)&imgdata[0], ORIENTATION_TOPLEFT, 0)) {
 			throw Exception() << " failed to read the image into a RGBA format";
 		}
 
 		if (bytespp == 3) {
 			int	pixel_count = width * height;
-			unsigned char *src = imgdata;
-			unsigned char *dst = imgdata;
+			unsigned char *src = &imgdata[0];
+			unsigned char *dst = &imgdata[0];
 			while( pixel_count > 0 ) {
 				*(dst++) = *(src++);
 				*(dst++) = *(src++);
@@ -67,25 +63,17 @@ IImage *TIFF_IO::load(const char *filename) {
 			}
 		}
 		//img's existence signifies that we've made it
-		img = new Image(Tensor::Vector<int,2>(width, height), imgdata, bytespp);
+		return new Image(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
 	} catch (const exception &t) {
-		//finally
-		if (in) TIFFClose(in);
-		//all else
-		delete[] imgdata;
-		throw Exception() << "TIFF_IO::load(" << filename << ") error: " << t.what();
-	}
-	
-	if (in) TIFFClose(in);
-	assert(img);
-	return img;
+		throw Exception() << "TIFF_IO::read(" << filename << ") error: " << t.what();
+	}	
 }
 
-void TIFF_IO::save(const IImage *img, const char *filename) {
+void TIFF_IO::write(std::string filename, const IImage *img) {
 	throw Exception() << "not implemented yet";
 }
 
 Singleton<TIFF_IO> tiffIO;
 
 };
-#endif
+

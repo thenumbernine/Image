@@ -1,0 +1,6 @@
+C++11 image loading library
+based on Tensor and on Common
+I'm slowly accumulating formats.
+The only one I really care about is FITS.
+Currently supports reading of: bmp, fits, jpeg, png, ppm, tga, and tiff
+Supports writing of some of those.

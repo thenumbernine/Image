@@ -1,3 +1,9 @@
+#if 0	//I'm having trouble linking against this, and I backed myself into a Makefile corner with declaring/removing source files, so the ol' #if 0 is my best option
+#include "Common/Exception.h"
+#include "Common/Finally.h"
+#include "Image/Image.h"
+#include "Image/IO.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 extern "C" {
@@ -8,33 +14,27 @@ extern "C" {
 }
 #include <setjmp.h>
 
-#include "Common/Exception.h"
-#include "Image/Image.h"
-#include "Image/IO.h"
+#include <vector>
 
 #ifdef WIN32
 #define strcasecmp _stricmp
 #endif
 
-using namespace Common;
-
 namespace Image {
 
 struct JPEG_IO : public IO {
 	virtual ~JPEG_IO(){}
-	virtual const char *name() { return "JPEG_IO"; }
-	virtual bool supportsExt(const char *fileExt);
-	virtual IImage *load(const char *filename);
-	virtual void save(const IImage *img, const char *filename);
+	virtual std::string name() { return "JPEG_IO"; }
+	virtual bool supportsExtension(std::string extension);
+	virtual IImage *read(std::string filename);
+	virtual void write(std::string filename, const IImage *img);
 
 #ifndef WIN32
 	//special-case for this loader
-	//useful when you download a jpeg and dont want to save it to disk to load it again
-	IImage *loadFromMemory(const char *buffer, size_t size);
+	//useful when you download a jpeg and dont want to write it to disk to read it again
+	IImage *readFromMemory(const char *buffer, size_t size);
 #endif
 };
-
-using namespace std;
 
 //////// begin jpeglib example rip
 
@@ -65,38 +65,36 @@ static void my_error_exit (j_common_ptr cinfo) {
 
 //////// end jpeglib example rip
 
-bool JPEG_IO::supportsExt(const char *fileExt) {
-	return !strcasecmp(fileExt, "jpeg")
-		|| !strcasecmp(fileExt, "jpg");
+bool JPEG_IO::supportsExtension(std::string extension) {
+	return !strcasecmp(extension.c_str(), "jpeg")
+		|| !strcasecmp(extension.c_str(), "jpg");
 }
 
-IImage *JPEG_IO::load(const char *filename) {
-	
-	FILE *fp = NULL;
-	struct jpeg_decompress_struct cinfo;
-	bool cinfo_init = false;
-	struct my_error_mgr jerr;
-	unsigned char *imgdata = NULL;
-	IImage *img = NULL;
-
+IImage *JPEG_IO::read(std::string filename) {
 	try {
-		if (!(fp = fopen(filename, "rb"))) throw Exception() << "couldn't open file " << filename;
+		FILE *file = fopen(filename.c_str(), "rb");
+		if (!file) throw Common::Exception() << "couldn't open file " << filename;
+		Common::Finally fileFinally([&](){ fclose(file); });
 
+		struct my_error_mgr jerr;
+		
+		struct jpeg_decompress_struct cinfo;
 		cinfo.err = jpeg_std_error(&jerr.pub);
 		
 		jerr.pub.error_exit = my_error_exit;
-		if (setjmp(jerr.setjmp_buffer)) throw Exception() << "jpeg error was hit";
+		if (setjmp(jerr.setjmp_buffer)) throw Common::Exception() << "jpeg error was hit";
 
-		cinfo_init = true;	//from here on out, if our longjmp gets hit, then jpeg_destroy_decompress is required.  thats how the example goes.
 		jpeg_create_decompress(&cinfo);
-		jpeg_stdio_src(&cinfo, fp);
+		Common::Finally jpegFinally([&](){ jpeg_destroy_decompress(&cinfo); });
+		
+		jpeg_stdio_src(&cinfo, file);
 		jpeg_read_header(&cinfo, TRUE);
 		jpeg_start_decompress(&cinfo);
 		int row_stride = cinfo.output_width * cinfo.output_components;
-		imgdata = new unsigned char[cinfo.output_height * row_stride];
+		std::vector<unsigned char> imgdata(cinfo.output_height * row_stride);
 
 		JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
-		unsigned char *dst = imgdata;
+		unsigned char *dst = &imgdata[0];
 		while (cinfo.output_scanline < cinfo.output_height) {
 			jpeg_read_scanlines(&cinfo, buffer, 1);
 			memcpy(dst, buffer[0], row_stride);
@@ -105,51 +103,32 @@ IImage *JPEG_IO::load(const char *filename) {
 
 		jpeg_finish_decompress(&cinfo);
 		
-		//img's existence signifies that we've made it
-		img = new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
-
-	} catch (const exception &t) {
-		//finally code
-		if (cinfo_init) jpeg_destroy_decompress(&cinfo);
-		if (fp) fclose(fp);
-		//just for excpetions
-		delete[] imgdata;
-		throw Exception() << "JPEG_IO::load(" << filename << ") error: " << t.what();
+		return new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
+	} catch (const std::exception &t) {
+		throw Common::Exception() << "JPEG_IO::read(" << filename << ") error: " << t.what();
 	}
-		
-	if (cinfo_init) jpeg_destroy_decompress(&cinfo);
-	if (fp) fclose(fp);
-	
-	assert(img);
-	
-	return img;
 }
 
-void JPEG_IO::save(const IImage *img, const char *filename) {
-	throw Exception() << "not implemented yet";
+void JPEG_IO::write(std::string filename, const IImage *img) {
+	throw Common::Exception() << "not implemented yet";
 }
 
 #ifndef WIN32
 
 //if i really wanted i could abstract this to combine with the above code
 //but the above seems to use libjpeg stuff made just for file loading
-//COMMIT THIS TO MEMORY
-IImage *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
-	
-	struct jpeg_decompress_struct cinfo;
-	bool cinfo_init = false;
-	struct my_error_mgr jerr;
-	unsigned char *imgdata = NULL;
-	IImage *img = NULL;
-
+IImage *JPEG_IO::readFromMemory(const char *buffer, size_t size) {
 	try {
+		struct my_error_mgr jerr;
+		
+		struct jpeg_decompress_struct cinfo;
 		cinfo.err = jpeg_std_error(&jerr.pub);
 		
 		jerr.pub.error_exit = my_error_exit;
-		if (setjmp(jerr.setjmp_buffer)) throw Exception() << "jpeg error was hit";
+		if (setjmp(jerr.setjmp_buffer)) throw Common::Exception() << "jpeg error was hit";
 
-		cinfo_init = true;	//from here on out, if our longjmp gets hit, then jpeg_destroy_decompress is required.  thats how the example goes.
 		jpeg_create_decompress(&cinfo);
+		Common::Finally jpegFinally([&](){ jpeg_destroy_decompress(&cinfo); });
 		
 		//here is where my code differs from above
 		//that and i got irif od the file pointer
@@ -261,10 +240,10 @@ IImage *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
 		jpeg_start_decompress(&cinfo);
 		int row_stride = cinfo.output_width * cinfo.output_components;
 
-		imgdata = new unsigned char[cinfo.output_height * row_stride];
+		std::vector<unsigned char> imgdata(cinfo.output_height * row_stride);
 
 		JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
-		unsigned char *dst = imgdata;
+		unsigned char *dst = &imgdata[0];
 		while (cinfo.output_scanline < cinfo.output_height) {
 			jpeg_read_scanlines(&cinfo, buffer, 1);
 			memcpy(dst, buffer[0], row_stride);
@@ -273,24 +252,16 @@ IImage *JPEG_IO::loadFromMemory(const char *buffer, size_t size) {
 
 		jpeg_finish_decompress(&cinfo);
 		
-		//img's existence signifies that we've made it
-		img = new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), imgdata);
-
-	} catch (const exception &t) {
-		//finally code
-		if (cinfo_init) jpeg_destroy_decompress(&cinfo);
-		//just for excpetions
-		delete[] imgdata;
-		throw Exception() << "JPEG_IO::loadFromMemory() error: " << t.what();
+		return new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
+	} catch (const std::exception &t) {
+		throw Common::Exception() << "JPEG_IO::readFromMemory() error: " << t.what();
 	}
-		
-	if (cinfo_init) jpeg_destroy_decompress(&cinfo);
-	assert(img);
-	return img;
 }
 
 #endif
 
-Singleton<JPEG_IO> jpegIO;
+Common::Singleton<JPEG_IO> jpegIO;
 
 };
+#endif
+

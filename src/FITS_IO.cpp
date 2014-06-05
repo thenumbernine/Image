@@ -1,7 +1,8 @@
 #include "Common/Exception.h"
+#include "Common/File.h"
 #include "Image/IO.h"
-
 #include "Tensor/Vector.h"
+#include <vector>
 
 #define __CINT__
 extern "C" {
@@ -15,34 +16,30 @@ extern "C" {
 #define strcasecmp _stricmp
 #endif
 
-using namespace Common;
-
 namespace Image {
 
 struct FITS_IO : public IO {
 	virtual ~FITS_IO() {}
-	virtual const char *name() { return "FITS_IO"; }
-	virtual bool supportsExt(const char *fileExt);
-	virtual IImage *load(const char *filename);
-	virtual void save(const IImage *img, const char *filename);
+	virtual std::string name() { return "FITS_IO"; }
+	virtual bool supportsExtension(std::string extension);
+	virtual IImage *read(std::string filename);
+	virtual void write(std::string filename, const IImage *img);
 };
 
-using namespace std;
-
-bool FITS_IO::supportsExt(const char *fileExt) {
-	return !strcasecmp(fileExt, "fits");
+bool FITS_IO::supportsExtension(std::string extension) {
+	return !strcasecmp(extension.c_str(), "fits");
 }
 
-IImage *FITS_IO::load(const char *filename) {
+IImage *FITS_IO::read(std::string filename) {
 	fitsfile *fitsFilePtr;
 	int status = 0;
-	ffopen(&fitsFilePtr, filename, READONLY, &status);
-	if (status) throw Exception() << "ffopen failed with " << status;
+	ffopen(&fitsFilePtr, filename.c_str(), READONLY, &status);
+	if (status) throw Common::Exception() << "ffopen failed with " << status;
 	
 	int bytesPerPixel = 0;
 	int bitPixType;
 	ffgidt(fitsFilePtr, &bitPixType, &status);
-	if (status) throw Exception() << "ffgidt failed with " << status;
+	if (status) throw Common::Exception() << "ffgidt failed with " << status;
 
 	int imgType = 0;
 	switch (bitPixType) {
@@ -67,13 +64,13 @@ IImage *FITS_IO::load(const char *filename) {
 		imgType = TDOUBLE;
 		break;
 	default:
-		throw Exception() << "image is an unsupported FITS type " << bitPixType;
+		throw Common::Exception() << "image is an unsupported FITS type " << bitPixType;
 	}
 	
 	int dim;
 	ffgidm(fitsFilePtr, &dim, &status);
-	if (status) throw Exception() << "ffgidm failed with " << status;
-	if (dim != 3) throw Exception() << "image is an unsupported dimension " << dim;
+	if (status) throw Common::Exception() << "ffgidm failed with " << status;
+	if (dim != 3) throw Common::Exception() << "image is an unsupported dimension " << dim;
 	
 	long int fpixel[3];
 	for (int i = 0; i < dim; i++) {
@@ -82,18 +79,18 @@ IImage *FITS_IO::load(const char *filename) {
 	
 	long int sizes[3];
 	ffgisz(fitsFilePtr, 3, sizes, &status);
-	if (status) throw Exception() << "ffgisz failed with " << status;
+	if (status) throw Common::Exception() << "ffgisz failed with " << status;
 	int width = sizes[0];
 	int height = sizes[1];
 	Tensor::Vector<int,2> size(width,height);
 	int channels = sizes[2];
 	
 	int numPixels = width * height * channels;
-	unsigned char *data = new unsigned char[numPixels * bytesPerPixel];
-	ffgpxv(fitsFilePtr, imgType, fpixel, numPixels, NULL, data, NULL, &status);
-	if (status) throw Exception() << "ffgpxv failed with " << status;
+	std::vector<unsigned char> data(numPixels * bytesPerPixel);
+	ffgpxv(fitsFilePtr, imgType, fpixel, numPixels, NULL, &data[0], NULL, &status);
+	if (status) throw Common::Exception() << "ffgpxv failed with " << status;
 	
-	IImage *img;
+	IImage *img = NULL;
 	switch (bitPixType) {
 	case BYTE_IMG:
 		switch (channels) {
@@ -101,7 +98,7 @@ IImage *FITS_IO::load(const char *filename) {
 		case 2: img = new ImageType<Tensor::Vector<char,2>>(size); break;
 		case 3: img = new ImageType<Tensor::Vector<char,3>>(size); break;
 		default:
-			throw Exception() << "unsupported channels for byte type: " << channels;
+			throw Common::Exception() << "unsupported channels for byte type: " << channels;
 		}
 		break;
 	case SHORT_IMG:
@@ -110,7 +107,7 @@ IImage *FITS_IO::load(const char *filename) {
 		case 2: img = new ImageType<Tensor::Vector<short,2>>(size); break;
 		case 3: img = new ImageType<Tensor::Vector<short,3>>(size); break;
 		default:
-			throw Exception() << "unsupported channels for short type: " << channels;
+			throw Common::Exception() << "unsupported channels for short type: " << channels;
 		}
 		break;
 	case LONG_IMG:
@@ -119,7 +116,7 @@ IImage *FITS_IO::load(const char *filename) {
 		case 2: img = new ImageType<Tensor::Vector<int,2>>(size); break;
 		case 3: img = new ImageType<Tensor::Vector<int,3>>(size); break;
 		default:
-			throw Exception() << "unsupported channels for int type: " << channels;
+			throw Common::Exception() << "unsupported channels for int type: " << channels;
 		}
 		break;
 	case FLOAT_IMG:
@@ -128,7 +125,7 @@ IImage *FITS_IO::load(const char *filename) {
 		case 2: img = new ImageType<Tensor::Vector<float,2>>(size); break;
 		case 3: img = new ImageType<Tensor::Vector<float,3>>(size); break;
 		default:
-			throw Exception() << "unsupported channels for float type: " << channels;
+			throw Common::Exception() << "unsupported channels for float type: " << channels;
 		}
 		break;
 	case DOUBLE_IMG:
@@ -137,37 +134,37 @@ IImage *FITS_IO::load(const char *filename) {
 		case 2: img = new ImageType<Tensor::Vector<double,2>>(size); break;
 		case 3: img = new ImageType<Tensor::Vector<double,3>>(size); break;
 		default:
-			throw Exception() << "unsupported channels for double type: " << channels;
+			throw Common::Exception() << "unsupported channels for double type: " << channels;
 		}
 		break;
 	default:
-		throw Exception() << "uncoded read type " << bitPixType;
+		throw Common::Exception() << "uncoded read type " << bitPixType;
 	}
-	memcpy(img->getData(), data, numPixels * bytesPerPixel);
+	memcpy(img->getData(), &data[0], numPixels * bytesPerPixel);
 	ffclos(fitsFilePtr, &status);
-	if (status) throw Exception() << "ffclos failed with " << status;
-	
+	if (status) {
+		delete img;
+		throw Common::Exception() << "ffclos failed with " << status;
+	}
 	return img;
 }
 
-static void saveType(const IImage *img, const char *filename, int imgType, int bitPixType, int DIM) {
+static void writeType(const IImage *img, std::string filename, int imgType, int bitPixType, int DIM) {
 
-	FILE *file = fopen(filename, "r");
-	if (file) {
-		fclose(file);
-		remove(filename);
+	if (Common::File::exists(filename)) {
+		Common::File::remove(filename);
 	}
-
+	
 	int status = 0;
 	
 	fitsfile *fitsFilePtr;
-	ffinit(&fitsFilePtr, filename, &status);
-	if (status) throw Exception() << "ffinit failed with " << status;
+	ffinit(&fitsFilePtr, filename.c_str(), &status);
+	if (status) throw Common::Exception() << "ffinit failed with " << status;
 
 	long sizes[3] = {img->getSize()(0), img->getSize()(1), DIM};
 	
 	status = ffphps(fitsFilePtr, bitPixType, 3, sizes, &status);
-	if (status) throw Exception() << "ffphps failed with " << status;
+	if (status) throw Common::Exception() << "ffphps failed with " << status;
 	
 	long int firstpix[3];
 	for (int i = 0; i < 3; i++) {
@@ -177,22 +174,22 @@ static void saveType(const IImage *img, const char *filename, int imgType, int b
 	int numPixels = img->getSize()(0) * img->getSize()(1) * DIM;
 	
 	ffppx(fitsFilePtr, imgType, firstpix, numPixels, (void*)img->getData(), &status);
-	if (status) throw Exception() << "ffppx failed with " << status;
+	if (status) throw Common::Exception() << "ffppx failed with " << status;
 	
 	ffclos(fitsFilePtr, &status);
-	if (status) throw Exception() << "ffclos failed with " << status;
+	if (status) throw Common::Exception() << "ffclos failed with " << status;
 }
 
 /*
 but all we have is channel size, not type ...
 time to dynamic-cast and find the right type ...
 */
-void FITS_IO::save(const IImage *img, const char *filename) {
+void FITS_IO::write(std::string filename, const IImage *img) {
 #define CHECK_SAVE_TYPE(T, imgType, bitPixType, DIM)	\
 	{	\
 		const ImageType<T> *img_ = dynamic_cast<const ImageType<T>*>(img);	\
 		if (img_) {	\
-			saveType(img, filename, imgType, bitPixType, DIM);	\
+			writeType(img, filename, imgType, bitPixType, DIM);	\
 			return;	\
 		}	\
 	}
@@ -213,9 +210,9 @@ void FITS_IO::save(const IImage *img, const char *filename) {
 	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 2>, TDOUBLE, DOUBLE_IMG, 2)
 	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 3>, TDOUBLE, DOUBLE_IMG, 3)
 	
-	throw Exception() << "failed to find RTTI for image";
+	throw Common::Exception() << "failed to find RTTI for image";
 }
 
-Singleton<FITS_IO> fitsIO;
+Common::Singleton<FITS_IO> fitsIO;
 
 };

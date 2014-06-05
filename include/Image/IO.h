@@ -3,6 +3,7 @@
 #include "Common/Singleton.h"
 #include "Common/Exception.h"
 #include "Image/Image.h"
+#include <string>
 
 namespace Image {
 
@@ -23,26 +24,24 @@ protected:
 	//attach yerself to the chain!
 	IO();
 	
-	//detach on dtor? only if ever you expect to declare one non-global...
-
 	IO *getNext();
 	
 public:
 
 	//returns whether or not we can load the file, based on matching extension
-	virtual bool supportsExt(const char *fileExt) = 0;
+	virtual bool supportsExtension(std::string extension) = 0;
 
 	//return the name of the loader, for identification
-	virtual const char *name() = 0;
+	virtual std::string name() = 0;
 
 	//returns the image in the file.
 	//throws an exception if it fails
 	//if it returns, you should be able to assert the image and its data exist
-	virtual IImage *load(const char *filename) = 0;
+	virtual IImage *read(std::string filename) = 0;
 	
 	//saves the image to the specified file
 	//throws an exception if it fails
-	virtual void save(const IImage *img, const char *filename) = 0;
+	virtual void write(std::string filename, const IImage *img) = 0;
 };
 
 };

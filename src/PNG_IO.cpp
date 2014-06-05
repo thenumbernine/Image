@@ -1,8 +1,10 @@
+#include "Image/IO.h"
+#include "Common/Exception.h"
+#include "Common/Finally.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <png.h>
-#include "Common/Exception.h"
-#include "Image/IO.h"
+#include <vector>
 
 #ifdef WIN32
 #define strcasecmp _stricmp
@@ -10,19 +12,15 @@
 
 //http://zarb.org/~gc/html/libpng.html
 
-using namespace Common;
-
 namespace Image {
 
 struct PNG_IO : public IO {
 	virtual ~PNG_IO(){}
-	virtual const char *name() { return "PNG_IO"; }
-	virtual bool supportsExt(const char *fileExt);
-	virtual IImage *load(const char *filename);
-	virtual void save(const IImage *img, const char *filename);
+	virtual std::string name() { return "PNG_IO"; }
+	virtual bool supportsExtension(std::string extension);
+	virtual IImage *read(std::string filename);
+	virtual void write(std::string filename, const IImage *img);
 };
-
-using namespace std;
 
 #if 0
 static int read_chunk_callback(png_infop ptr,
@@ -46,32 +44,34 @@ static int read_chunk_callback(png_infop ptr,
 }
 #endif
 
-bool PNG_IO::supportsExt(const char *fileExt) {
-	return !strcasecmp(fileExt, "png");
+bool PNG_IO::supportsExtension(std::string extension) {
+	return !strcasecmp(extension.c_str(), "png");
 }
 
-IImage *PNG_IO::load(const char *filename) {	
-	FILE *fp = NULL;
-	png_structp png_ptr = NULL;
-	png_infop info_ptr = NULL;
-	png_infop end_info = NULL;
-	png_bytep row_buf = NULL;
-	unsigned char *imgdata = NULL;
-	IImage *img = NULL;
-	
+IImage *PNG_IO::read(std::string filename) {		
 	try {
-		if (!(fp = fopen(filename, "rb"))) throw Exception() << "couldn't open file " << filename;
+		FILE *file = fopen(filename.c_str(), "rb");
+		if (!file) throw Common::Exception() << "couldn't open file " << filename;
+		Common::Finally fileFinally([&](){ fclose(file); });
 
-		if (!(png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL))) throw Exception() << "failed to alloc png_ptr";
-		if (!(info_ptr = png_create_info_struct(png_ptr))) throw Exception() << "failed to create info struct";
-		if (!(end_info = png_create_info_struct(png_ptr))) throw Exception() << "failed to create end info struct";
+		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
+		if (!png_ptr) throw Common::Exception() << "failed to alloc png_ptr";
+		
+		png_infop info_ptr = NULL;
+		png_infop end_info = NULL;
+		Common::Finally pngPtrFinally([&](){
+			png_destroy_read_struct(&png_ptr, info_ptr ? &info_ptr : (png_infopp)NULL, end_info ? &end_info : (png_infopp)NULL);
+		});
+		
+		if (!(info_ptr = png_create_info_struct(png_ptr))) throw Common::Exception() << "failed to create info struct";
+		if (!(end_info = png_create_info_struct(png_ptr))) throw Common::Exception() << "failed to create end info struct";
 
 		//i'm new to long jumps, but does this make this location the destination of the png_ptr longjump?
-		if (setjmp(png_jmpbuf(png_ptr))) throw Exception() << "png_jmpbuf was hit";
+		if (setjmp(png_jmpbuf(png_ptr))) throw Common::Exception() << "png_jmpbuf was hit";
 
 		//from here on out we're using libpng's longjump rather than C++'s try/catch
 
-		png_init_io(png_ptr, fp);
+		png_init_io(png_ptr, file);
 		png_set_read_status_fn(png_ptr, NULL);		//for reporting stuff as the rows complete reading
 
 		//getting a crash here with my windows library
@@ -96,17 +96,19 @@ IImage *PNG_IO::load(const char *filename) {
 		if (bit_depth == 16) png_set_strip_16(png_ptr);
 		if (bit_depth < 8) png_set_packing(png_ptr);
 		
-		row_buf = (png_bytep)png_malloc(png_ptr, rowbytes);
+		png_bytep row_buf = (png_bytep)png_malloc(png_ptr, rowbytes);
+		Common::Finally rowBufFinally([&](){ png_free(png_ptr, row_buf); });
+		
 		int num_pass = png_set_interlace_handling(png_ptr);
 
 		bool hasAlpha = color_type & PNG_COLOR_MASK_ALPHA;
 		int bytespp = hasAlpha ? 4 : 3;
-		imgdata = new unsigned char[height * rowbytes];
+		std::vector<unsigned char> imgdata(height * rowbytes);
 		
 		//what is the purpose of multiple passes?
 		//interlaced mode, but i'm memcpying... 
 		for (int pass = 0; pass < num_pass; pass++) {
-			unsigned char *dst = imgdata;
+			unsigned char *dst = &imgdata[0];
 			for (int y = 0; y < height; y++) {
 				png_read_rows(png_ptr, (png_bytepp)&row_buf, NULL, 1);
 				memcpy(dst, row_buf, rowbytes);
@@ -117,53 +119,40 @@ IImage *PNG_IO::load(const char *filename) {
 		png_free_data(png_ptr, info_ptr, PNG_FREE_UNKN, -1);
 		png_read_end(png_ptr, end_info);
 		
-		//img's existence signifies that we've made it
-		img = new Image(Tensor::Vector<int,2>(width, height), imgdata, bytespp);
-	} catch (const exception &t) {
+		return new Image(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
+	} catch (const std::exception &t) {
 		//finally
-		if (row_buf) png_free(png_ptr, row_buf);
-		if (png_ptr) png_destroy_read_struct(&png_ptr, info_ptr ? &info_ptr : (png_infopp)NULL, end_info ? &end_info : (png_infopp)NULL);
-		if (fp) fclose(fp);
-		//and all else
-		delete[] imgdata;
-		throw Exception() << "PNG_IO::load(" << filename << ") error: " << t.what();
+		throw Common::Exception() << "PNG_IO::read(" << filename << ") error: " << t.what();
 	}
-
-	if (row_buf) png_free(png_ptr, row_buf);
-	if (png_ptr) png_destroy_read_struct(&png_ptr, info_ptr ? &info_ptr : (png_infopp)NULL, end_info ? &end_info : (png_infopp)NULL);
-	if (fp) fclose(fp);
-	
-	assert(img);
-	return img;
 }
 
-void PNG_IO::save(const IImage *img, const char *filename) {
-
-	FILE *fp = NULL;
-	png_structp png_ptr = NULL;
-	png_infop info_ptr = NULL;
-	png_bytep * row_pointers = NULL;
-
+void PNG_IO::write(std::string filename, const IImage *img) {
 	try {
-		/* create file */
-		if (!(fp = fopen(filename, "wb"))) throw Exception() << "could not be opened for writing";
+		FILE *file = fopen(filename.c_str(), "wb");
+		if (!file) throw Common::Exception() << "could not be opened for writing";
+		Common::Finally fileFinally([&](){ fclose(file); });
 
 		/* initialize stuff */
-		png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-		if (!png_ptr) throw Exception() << "png_create_write_struct failed";
+		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		if (!png_ptr) throw Common::Exception() << "png_create_write_struct failed";
+		
+		png_infop info_ptr = NULL;
+		Common::Finally pngPtrFinally([&](){
+			png_destroy_write_struct(&png_ptr, info_ptr ? &info_ptr : (png_infopp)NULL);
+		});
 
 		info_ptr = png_create_info_struct(png_ptr);
-		if (!info_ptr) throw Exception() << "png_create_info_struct failed";
+		if (!info_ptr) throw Common::Exception() << "png_create_info_struct failed";
 
-		if (setjmp(png_jmpbuf(png_ptr))) throw Exception() << "Error during init_io";
+		if (setjmp(png_jmpbuf(png_ptr))) throw Common::Exception() << "Error during init_io";
 
-		png_init_io(png_ptr, fp);
+		png_init_io(png_ptr, file);
 
 
 		/* write header */
-		if (setjmp(png_jmpbuf(png_ptr))) throw Exception() << "Error during writing header";
+		if (setjmp(png_jmpbuf(png_ptr))) throw Common::Exception() << "Error during writing header";
 
-		if (img->getChannels() != 3 && img->getChannels() != 4) throw Exception() << "only supports 24 or 32 bpp";
+		if (img->getChannels() != 3 && img->getChannels() != 4) throw Common::Exception() << "only supports 24 or 32 bpp";
 
 		png_uint_32 width = img->getSize()(0);
 		png_uint_32 height = img->getSize()(1);
@@ -173,36 +162,26 @@ void PNG_IO::save(const IImage *img, const char *filename) {
 
 		png_write_info(png_ptr, info_ptr);
 
-		row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
+		std::vector<png_bytep> row_pointers(height);
 		int bytesPerPixel = img->getChannels();
 		for (int y=0; y<height; y++) {
 			row_pointers[y] = (png_byte*)(img->getData() + y * img->getSize()(0) * bytesPerPixel);
 		}
 		
-		
 		/* write bytes */
-		if (setjmp(png_jmpbuf(png_ptr))) throw Exception() << "Error during writing bytes";
+		if (setjmp(png_jmpbuf(png_ptr))) throw Common::Exception() << "Error during writing bytes";
 
-		png_write_image(png_ptr, row_pointers);
+		png_write_image(png_ptr, &row_pointers[0]);
 
 		/* end write */
-		if (setjmp(png_jmpbuf(png_ptr))) throw Exception() << "Error during end of write";
+		if (setjmp(png_jmpbuf(png_ptr))) throw Common::Exception() << "Error during end of write";
 
 		png_write_end(png_ptr, NULL);
-	} catch (const exception &t) {
-		//finally
-		free(row_pointers);
-		fclose(fp);
-		//all else
-		throw Exception() << "PNG_IO::save("<<filename<<") failed: " << t.what();
+	} catch (const std::exception &t) {
+		throw Common::Exception() << "PNG_IO::write("<<filename<<") failed: " << t.what();
 	}
-	
-	//TODO - destroy_write_struct, to parallel the destroy_read_struct above?
-
-	free(row_pointers);
-	fclose(fp);
 }
 
-Singleton<PNG_IO> pngIO;
+Common::Singleton<PNG_IO> pngIO;
 
 };

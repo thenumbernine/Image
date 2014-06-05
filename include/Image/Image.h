@@ -9,6 +9,7 @@ namespace Image {
 
 //image interface
 struct IImage {
+	virtual ~IImage() {};
 	virtual Tensor::Vector<int,2> getSize() const = 0;
 	virtual int getChannels() const = 0;
 	virtual int getBitsPerPixel() const { return getChannels() << 3; }
@@ -39,7 +40,7 @@ public:
 		}
 	}
 
-	~ImageType() {
+	virtual ~ImageType() {
 		delete grid;
 	}
 
@@ -51,6 +52,14 @@ public:
 	virtual const char *getData() const { return (char*)grid->v; }
 	virtual Type *getDataType() { return grid->v; }
 	virtual const Type *getDataType() const { return grid->v; }
+
+	virtual Grid *getGrid() { return grid; }
+
+	//it'd be nice to return a vector with size the # of channels
+	// but channels is not a compile time variable, so you have to pick out your elements individually.
+	// should it become one?
+	Type &operator()(int i, int j, int ch = 0) { return (*grid)(Tensor::Vector<int,3>(i,j,ch)); }
+	const Type &operator()(int i, int j, int ch = 0) const { return (*grid)(Tensor::Vector<int,3>(i,j,ch)); }
 };
 
 typedef struct ImageType<> Image;

@@ -1,13 +1,11 @@
-#include <fstream>
 #include "Image/IO.h"
 #include "Image/Image.h"
+#include <fstream>
+#include <vector>
 
 #ifdef WIN32
 #define strcasecmp _stricmp
 #endif
-
-using namespace Common;
-using namespace std;
 
 namespace Image {
 
@@ -38,29 +36,27 @@ struct bitmapHeader_t {
 
 struct BMP_IO : public IO {
 	virtual ~BMP_IO(){}
-	virtual const char *name() { return "BMP_IO"; }
-	virtual bool supportsExt(const char *fileExt) {
-		return !strcasecmp(fileExt, "bmp");
+	virtual std::string name() { return "BMP_IO"; }
+	virtual bool supportsExtension(std::string extension) {
+		return !strcasecmp(extension.c_str(), "bmp");
 	}
-	virtual IImage *load(const char *filename) {
+	virtual IImage *read(std::string filename) {
 
 		//list out resources we have to free here:
-		unsigned char *imgdata = NULL;
-		IImage *img = NULL;
 		try {
-			ifstream f(filename, ios::binary);
-			if (!f.is_open()) throw Exception() << "failed to open file for reading";
+			std::ifstream file(filename, std::ios::binary);
+			if (!file) throw Common::Exception() << "failed to open file for reading";
 			
 			short sig;
-			f.read((char *)&sig, sizeof(sig));
-			if (sig != 0x4D42) throw Exception() << "got a bad sig:" << sig;
+			if (!file.read((char *)&sig, sizeof(sig))) throw Common::Exception() << "failed to read signature";
+			if (sig != 0x4D42) throw Common::Exception() << "got a bad signature " << sig;
 			
 			bitmapHeader_t hdr;
-			f.read((char *)&hdr, sizeof(hdr));
+			if (!file.read((char *)&hdr, sizeof(hdr))) throw Common::Exception() << "failed to read header";
 
-			if (hdr.planes != 1) throw Exception() << "got bad # planes:" << hdr.planes;
-			if (hdr.bitsPerPixel != 24) throw Exception() << "got an unhandled bitsPerPixel:" << hdr.bitsPerPixel;
-			if (hdr.compression) throw Exception() << "got an unhandled compression: " << hdr.compression;
+			if (hdr.planes != 1) throw Common::Exception() << "got bad # planes:" << hdr.planes;
+			if (hdr.bitsPerPixel != 24) throw Common::Exception() << "got an unhandled bitsPerPixel:" << hdr.bitsPerPixel;
+			if (hdr.compression) throw Common::Exception() << "got an unhandled compression: " << hdr.compression;
 
 			//now get our row skip:
 			int stride = hdr.width * hdr.bitsPerPixel;
@@ -81,45 +77,42 @@ struct BMP_IO : public IO {
 			}
 			
 			int imgsize = stride * height;
-			imgdata = new unsigned char[imgsize];
+			std::vector<char> imgdata(imgsize);
 			
-			f.seekg(hdr.imgOffset, ios_base::beg);
+			file.seekg(hdr.imgOffset, std::ios::beg);
 
 			//now read it through - getting rid of the row spacing
 			int dummy;
 			for (int y = ystart; y != yend; y += ystep) {
 				//swap ys as we go =) bitmaps are upside-down
-				unsigned char *dst = imgdata + y * hdr.width * 3;
+				char *dst = &imgdata[y * hdr.width * 3];
 				//swap red and blue as we go =)
 				for (int x = 0; x < hdr.width; x++, dst += 3) {
-					dst[2] = f.get();
-					dst[1] = f.get();
-					dst[0] = f.get();
+					for (int ch = 2; ch >= 0; --ch) {
+						if (!file.get(dst[2])) throw Common::Exception() << "failed to read data";
+					}
 				}
-				f.read((char *)&dummy, padding);
+				if (!file.read((char *)&dummy, padding)) throw Common::Exception() << "failed to read data";
 			}
 			
 			//do this last so img == null if anything goes wrong
-			img = new Image(
+			return new Image(
 				Tensor::Vector<int,2>(hdr.width, height),	//size
-				imgdata,							//data
+				&imgdata[0],							//data
 				hdr.bitsPerPixel >> 3);				//channels
-		} catch (const exception &t) {
+		} catch (const std::exception &t) {
 			//finally code ...
 			//only for errors
-			delete[] imgdata;
-			throw Exception() << "BMP_IO::load("<<filename<<") error: " << t.what();
+			throw Common::Exception() << "BMP_IO::read("<<filename<<") error: " << t.what();
 		}
-		assert(img);
-		return img;		
 	}
-	virtual void save(const IImage *img, const char *filename) {
+	virtual void write(std::string filename, const IImage *img) {
 		try {
-			if (img->getBitsPerPixel() < 24) throw Exception() << "don't support writing for " << img->getBitsPerPixel() << " bits per pixel yet";
+			if (img->getBitsPerPixel() < 24) throw Common::Exception() << "don't support writing for " << img->getBitsPerPixel() << " bits per pixel yet";
 
-			ofstream f(filename, ios::binary);
-			if (!f.is_open()) throw Exception() << "failed to open file for writing";
-			f.write("BM",2);
+			std::ofstream file(filename, std::ios::binary);
+			if (!file) throw Common::Exception() << "failed to open file for writing";
+			if (!file.write("BM",2)) throw Common::Exception() << "failed to write signature";
 			
 			bitmapHeader_t hdr;
 			memset(&hdr, 0, sizeof(hdr));
@@ -136,25 +129,25 @@ struct BMP_IO : public IO {
 			hdr.fileSize = hdr.imgOffset + hdr.imgSize;	//no palette data atm
 			hdr.planes = 1;
 			hdr.bitsPerPixel = 24;
-			f.write((const char*)&hdr, sizeof(hdr));
+			if (!file.write((const char*)&hdr, sizeof(hdr))) throw Common::Exception() << "failed to write header";
 			
 			int bytesPerPixel = img->getChannels();
 			int dummy = 0;
 			for (int y = img->getSize()(1)-1; y >= 0; y--) {
 				const char *src = img->getData() + img->getSize()(0) * bytesPerPixel * y;
 				for (int x = 0; x < img->getSize()(0); x++, src += bytesPerPixel) {
-					f.put(src[2]);
-					f.put(src[1]);
-					f.put(src[0]);
+					for (int ch = 2; ch >= 0; --ch) {
+						if (!file.put(src[ch])) throw Common::Exception() << "failed to write data";
+					}
 				}
-				f.write((const char *)&dummy, padding);
+				if (!file.write((const char *)&dummy, padding)) throw Common::Exception() << "failed to write padding";
 			}
-		} catch (const exception &t) {
-			throw Exception() << "BMP_IO::save("<<filename<<") error:" << t.what();
+		} catch (const std::exception &t) {
+			throw Common::Exception() << "BMP_IO::write("<<filename<<") error:" << t.what();
 		}
 	}
 };
-static Singleton<BMP_IO> bmpIO;
+static Common::Singleton<BMP_IO> bmpIO;
 
 };
 
