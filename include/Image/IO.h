@@ -37,11 +37,11 @@ public:
 	//returns the image in the file.
 	//throws an exception if it fails
 	//if it returns, you should be able to assert the image and its data exist
-	virtual IImage *read(std::string filename) = 0;
+	virtual std::shared_ptr<IImage> read(std::string filename) = 0;
 	
 	//saves the image to the specified file
 	//throws an exception if it fails
-	virtual void write(std::string filename, const IImage *img) = 0;
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img) = 0;
 };
 
 };

@@ -19,8 +19,8 @@ struct PNG_IO : public IO {
 	virtual ~PNG_IO(){}
 	virtual std::string name() { return "PNG_IO"; }
 	virtual bool supportsExtension(std::string extension);
-	virtual IImage *read(std::string filename);
-	virtual void write(std::string filename, const IImage *img);
+	virtual std::shared_ptr<IImage> read(std::string filename);
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
 };
 
 #if 0
@@ -49,7 +49,7 @@ bool PNG_IO::supportsExtension(std::string extension) {
 	return !strcasecmp(extension.c_str(), "png");
 }
 
-IImage *PNG_IO::read(std::string filename) {		
+std::shared_ptr<IImage> PNG_IO::read(std::string filename) {		
 	try {
 		FILE *file = fopen(filename.c_str(), "rb");
 		if (!file) throw Common::Exception() << "couldn't open file " << filename;
@@ -120,14 +120,13 @@ IImage *PNG_IO::read(std::string filename) {
 		png_free_data(png_ptr, info_ptr, PNG_FREE_UNKN, -1);
 		png_read_end(png_ptr, end_info);
 		
-		return new Image(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
+		return std::make_shared<Image>(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
 	} catch (const std::exception &t) {
-		//finally
 		throw Common::Exception() << "PNG_IO::read(" << filename << ") error: " << t.what();
 	}
 }
 
-void PNG_IO::write(std::string filename, const IImage *img) {
+void PNG_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
 	try {
 		FILE *file = fopen(filename.c_str(), "wb");
 		if (!file) throw Common::Exception() << "could not be opened for writing";

@@ -5,8 +5,8 @@ namespace Image {
 
 IO::IO() {
 	//LOCK ON!
-	next = sys->baseIO;
-	sys->baseIO = this;
+	next = system->baseIO;
+	system->baseIO = this;
 }
 
 IO *IO::getNext() { return next; }

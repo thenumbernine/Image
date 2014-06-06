@@ -18,7 +18,7 @@ struct TGA_IO : public IO {
 	virtual bool supportsExtension(std::string extension) {
 		return !strcasecmp(extension.c_str(), "tga");
 	}
-	virtual IImage *read(std::string filename) {
+	virtual std::shared_ptr<IImage> read(std::string filename) {
 		try {
 			std::ifstream file(filename, std::ios::binary);
 			if (!file) throw Common::Exception() << "unable to open file";
@@ -112,14 +112,14 @@ struct TGA_IO : public IO {
 			}
 		
 			if (bitsPerPixel & 7) throw Common::Exception() << "unsupported bits per pixel " << bitsPerPixel;
-			return new Image(Tensor::Vector<int,2>(width, height), &imgdata[0], bitsPerPixel >> 3);
+			return std::make_shared<Image>(Tensor::Vector<int,2>(width, height), &imgdata[0], bitsPerPixel >> 3);
 		} catch (const std::exception &t) {
 			//finally
 			//all else
 			throw Common::Exception() << "TGA_IO::read(" << filename << ") error: " << t.what();
 		}
 	}
-	virtual void write(std::string filename, const IImage *img) {
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img) {
 		throw Common::Exception() << "not implemented yet";
 	}
 };

@@ -41,7 +41,7 @@ struct BMP_IO : public IO {
 	virtual bool supportsExtension(std::string extension) {
 		return !strcasecmp(extension.c_str(), "bmp");
 	}
-	virtual IImage *read(std::string filename) {
+	virtual std::shared_ptr<IImage> read(std::string filename) {
 
 		//list out resources we have to free here:
 		try {
@@ -97,7 +97,7 @@ struct BMP_IO : public IO {
 			}
 			
 			//do this last so img == null if anything goes wrong
-			return new Image(
+			return std::make_shared<Image>(
 				Tensor::Vector<int,2>(hdr.width, height),	//size
 				&imgdata[0],							//data
 				hdr.bitsPerPixel >> 3);				//channels
@@ -107,7 +107,7 @@ struct BMP_IO : public IO {
 			throw Common::Exception() << "BMP_IO::read("<<filename<<") error: " << t.what();
 		}
 	}
-	virtual void write(std::string filename, const IImage *img) {
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img) {
 		try {
 			if (img->getBitsPerPixel() < 24) throw Common::Exception() << "don't support writing for " << img->getBitsPerPixel() << " bits per pixel yet";
 

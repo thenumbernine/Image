@@ -23,15 +23,15 @@ struct FITS_IO : public IO {
 	virtual ~FITS_IO() {}
 	virtual std::string name() { return "FITS_IO"; }
 	virtual bool supportsExtension(std::string extension);
-	virtual IImage *read(std::string filename);
-	virtual void write(std::string filename, const IImage *img);
+	virtual std::shared_ptr<IImage> read(std::string filename);
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
 };
 
 bool FITS_IO::supportsExtension(std::string extension) {
 	return !strcasecmp(extension.c_str(), "fits");
 }
 
-IImage *FITS_IO::read(std::string filename) {
+std::shared_ptr<IImage> FITS_IO::read(std::string filename) {
 	fitsfile *fitsFilePtr;
 	int status = 0;
 	ffopen(&fitsFilePtr, filename.c_str(), READONLY, &status);
@@ -91,49 +91,49 @@ IImage *FITS_IO::read(std::string filename) {
 	ffgpxv(fitsFilePtr, imgType, fpixel, numPixels, NULL, &data[0], NULL, &status);
 	if (status) throw Common::Exception() << "ffgpxv failed with " << status;
 	
-	IImage *img = NULL;
+	std::shared_ptr<IImage> img;
 	switch (bitPixType) {
 	case BYTE_IMG:
 		switch (channels) {
-		case 1: img = new ImageType<char>(size); break;
-		case 2: img = new ImageType<Tensor::Vector<char,2>>(size); break;
-		case 3: img = new ImageType<Tensor::Vector<char,3>>(size); break;
+		case 1: img = std::make_shared<ImageType<char>>(size); break;
+		case 2: img = std::make_shared<ImageType<Tensor::Vector<char,2>>>(size); break;
+		case 3: img = std::make_shared<ImageType<Tensor::Vector<char,3>>>(size); break;
 		default:
 			throw Common::Exception() << "unsupported channels for byte type: " << channels;
 		}
 		break;
 	case SHORT_IMG:
 		switch (channels) {
-		case 1: img = new ImageType<short>(size); break;
-		case 2: img = new ImageType<Tensor::Vector<short,2>>(size); break;
-		case 3: img = new ImageType<Tensor::Vector<short,3>>(size); break;
+		case 1: img = std::make_shared<ImageType<short>>(size); break;
+		case 2: img = std::make_shared<ImageType<Tensor::Vector<short,2>>>(size); break;
+		case 3: img = std::make_shared<ImageType<Tensor::Vector<short,3>>>(size); break;
 		default:
 			throw Common::Exception() << "unsupported channels for short type: " << channels;
 		}
 		break;
 	case LONG_IMG:
 		switch (channels) {
-		case 1: img = new ImageType<int>(size); break;
-		case 2: img = new ImageType<Tensor::Vector<int,2>>(size); break;
-		case 3: img = new ImageType<Tensor::Vector<int,3>>(size); break;
+		case 1: img = std::make_shared<ImageType<int>>(size); break;
+		case 2: img = std::make_shared<ImageType<Tensor::Vector<int,2>>>(size); break;
+		case 3: img = std::make_shared<ImageType<Tensor::Vector<int,3>>>(size); break;
 		default:
 			throw Common::Exception() << "unsupported channels for int type: " << channels;
 		}
 		break;
 	case FLOAT_IMG:
 		switch (channels) {
-		case 1: img = new ImageType<float>(size); break;
-		case 2: img = new ImageType<Tensor::Vector<float,2>>(size); break;
-		case 3: img = new ImageType<Tensor::Vector<float,3>>(size); break;
+		case 1: img = std::make_shared<ImageType<float>>(size); break;
+		case 2: img = std::make_shared<ImageType<Tensor::Vector<float,2>>>(size); break;
+		case 3: img = std::make_shared<ImageType<Tensor::Vector<float,3>>>(size); break;
 		default:
 			throw Common::Exception() << "unsupported channels for float type: " << channels;
 		}
 		break;
 	case DOUBLE_IMG:
 		switch (channels) {
-		case 1: img = new ImageType<double>(size); break;
-		case 2: img = new ImageType<Tensor::Vector<double,2>>(size); break;
-		case 3: img = new ImageType<Tensor::Vector<double,3>>(size); break;
+		case 1: img = std::make_shared<ImageType<double>>(size); break;
+		case 2: img = std::make_shared<ImageType<Tensor::Vector<double,2>>>(size); break;
+		case 3: img = std::make_shared<ImageType<Tensor::Vector<double,3>>>(size); break;
 		default:
 			throw Common::Exception() << "unsupported channels for double type: " << channels;
 		}
@@ -143,14 +143,11 @@ IImage *FITS_IO::read(std::string filename) {
 	}
 	memcpy(img->getData(), &data[0], numPixels * bytesPerPixel);
 	ffclos(fitsFilePtr, &status);
-	if (status) {
-		delete img;
-		throw Common::Exception() << "ffclos failed with " << status;
-	}
+	if (status) throw Common::Exception() << "ffclos failed with " << status;
 	return img;
 }
 
-static void writeType(const IImage *img, std::string filename, int imgType, int bitPixType, int DIM) {
+static void writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int DIM) {
 
 	if (Common::File::exists(filename)) {
 		Common::File::remove(filename);
@@ -185,12 +182,12 @@ static void writeType(const IImage *img, std::string filename, int imgType, int 
 but all we have is channel size, not type ...
 time to dynamic-cast and find the right type ...
 */
-void FITS_IO::write(std::string filename, const IImage *img) {
+void FITS_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
 #define CHECK_SAVE_TYPE(T, imgType, bitPixType, DIM)	\
 	{	\
-		const ImageType<T> *img_ = dynamic_cast<const ImageType<T>*>(img);	\
+		std::shared_ptr<const ImageType<T>> img_ = std::dynamic_pointer_cast<const ImageType<T>>(img);	\
 		if (img_) {	\
-			writeType(img, filename, imgType, bitPixType, DIM);	\
+			writeType(filename, img, imgType, bitPixType, DIM);	\
 			return;	\
 		}	\
 	}

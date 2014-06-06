@@ -4,7 +4,7 @@
 
 namespace Image {
 
-IImage *System::read(std::string filename) {
+std::shared_ptr<IImage> System::read(std::string filename) {
 	std::string ext = Common::File::getExtension(filename);
 
 	try {
@@ -18,7 +18,7 @@ IImage *System::read(std::string filename) {
 	}
 }
 
-void System::write(std::string filename, const IImage *image) {
+void System::write(std::string filename, std::shared_ptr<const IImage> image) {
 	std::string ext = Common::File::getExtension(filename);
 
 	try {
@@ -27,13 +27,13 @@ void System::write(std::string filename, const IImage *image) {
 			io->write(filename, image);	//throws if things go wrong
 			return;
 		}
-		throw Common::Exception() << "failed to find an appropriate reader for extension " << ext;
+		throw Common::Exception() << "failed to find an appropriate writer for extension " << ext;
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "Image::System::save(" << filename << ") error: " << t.what();
 	}
 }
 
-Common::Singleton<System> sys;
+Common::Singleton<System> system;
 
 };
 

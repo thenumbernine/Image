@@ -19,7 +19,7 @@ struct PPM_IO : public IO {
 	virtual bool supportsExtension(std::string extension) {
 		return !strcasecmp(extension.c_str(), "ppm");
 	}
-	virtual IImage *read(std::string filename) {
+	virtual std::shared_ptr<IImage> read(std::string filename) {
 		try {
 			
 			int h,w, maxVal;
@@ -58,12 +58,12 @@ struct PPM_IO : public IO {
 				if (i >= size) break;
 			}
 
-			return new Image(Tensor::Vector<int,2>(w,h), &imgdata[0]);
+			return std::make_shared<Image>(Tensor::Vector<int,2>(w,h), &imgdata[0]);
 		} catch (const std::exception &t) {
 			throw Common::Exception() << "PPM_IO::read(" << filename << ") error: " << t.what();
 		}
 	}
-	virtual void write(std::string filename, const IImage *img) {
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img) {
 		throw Common::Exception() << "not implemented yet";
 	}
 };

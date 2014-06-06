@@ -26,13 +26,13 @@ struct JPEG_IO : public IO {
 	virtual ~JPEG_IO(){}
 	virtual std::string name() { return "JPEG_IO"; }
 	virtual bool supportsExtension(std::string extension);
-	virtual IImage *read(std::string filename);
-	virtual void write(std::string filename, const IImage *img);
+	virtual std::shared_ptr<IImage> read(std::string filename);
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
 
 #ifndef WIN32
 	//special-case for this loader
 	//useful when you download a jpeg and dont want to write it to disk to read it again
-	IImage *readFromMemory(const char *buffer, size_t size);
+	std::shared_ptr<IImage> readFromMemory(const char *buffer, size_t size);
 #endif
 };
 
@@ -70,7 +70,7 @@ bool JPEG_IO::supportsExtension(std::string extension) {
 		|| !strcasecmp(extension.c_str(), "jpg");
 }
 
-IImage *JPEG_IO::read(std::string filename) {
+std::shared_ptr<IImage> JPEG_IO::read(std::string filename) {
 	try {
 		FILE *file = fopen(filename.c_str(), "rb");
 		if (!file) throw Common::Exception() << "couldn't open file " << filename;
@@ -103,13 +103,13 @@ IImage *JPEG_IO::read(std::string filename) {
 
 		jpeg_finish_decompress(&cinfo);
 		
-		return new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
+		return std::make_shared<Image>(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "JPEG_IO::read(" << filename << ") error: " << t.what();
 	}
 }
 
-void JPEG_IO::write(std::string filename, const IImage *img) {
+void JPEG_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
 	throw Common::Exception() << "not implemented yet";
 }
 
@@ -117,7 +117,7 @@ void JPEG_IO::write(std::string filename, const IImage *img) {
 
 //if i really wanted i could abstract this to combine with the above code
 //but the above seems to use libjpeg stuff made just for file loading
-IImage *JPEG_IO::readFromMemory(const char *buffer, size_t size) {
+std::shared_ptr<IImage> JPEG_IO::readFromMemory(const char *buffer, size_t size) {
 	try {
 		struct my_error_mgr jerr;
 		
@@ -252,7 +252,7 @@ IImage *JPEG_IO::readFromMemory(const char *buffer, size_t size) {
 
 		jpeg_finish_decompress(&cinfo);
 		
-		return new Image(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
+		return std::make_shared<Image>(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "JPEG_IO::readFromMemory() error: " << t.what();
 	}

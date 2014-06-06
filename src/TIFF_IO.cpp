@@ -19,8 +19,8 @@ struct TIFF_IO : public IO {
 	virtual ~TIFF_IO(){}
 	virtual std::string name(void) { return "TIFF_IO"; }
 	virtual bool supportsExtension(std::string extension);
-	virtual IImage *read(std::string filename);
-	virtual void write(std::string filename, const IImage *img);
+	virtual std::shared_ptr<IImage> read(std::string filename);
+	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
 };
 
 using namespace std;
@@ -30,7 +30,7 @@ bool TIFF_IO::supportsExtension(std::string extension) {
 		|| !strcasecmp(extension.c_str(), "tiff");
 }
 
-IImage *TIFF_IO::read(std::string filename) {
+std::shared_ptr<IImage> TIFF_IO::read(std::string filename) {
 	try {
 		TIFF *tiff = TIFFOpen(filename.c_str(), "r");
 		if (!tiff) throw Exception() << " couldn't open file " << filename;
@@ -64,13 +64,13 @@ IImage *TIFF_IO::read(std::string filename) {
 			}
 		}
 		//img's existence signifies that we've made it
-		return new Image(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
+		return std::make_shared<Image>(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
 	} catch (const exception &t) {
 		throw Exception() << "TIFF_IO::read(" << filename << ") error: " << t.what();
 	}	
 }
 
-void TIFF_IO::write(std::string filename, const IImage *img) {
+void TIFF_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
 	throw Exception() << "not implemented yet";
 }
 
