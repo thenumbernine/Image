@@ -24,25 +24,22 @@ protected:
 	Tensor::Vector<int,3> size;	//channels, width, height
 
 	typedef Tensor::Grid<Type, 3> Grid;
-	Grid *grid;
+	std::shared_ptr<Grid> grid;
 
 public:
 	ImageType(const Tensor::Vector<int,2> size_, void *data = NULL, int channels = 3) 
-	: grid(NULL)
 	{
 		size(0) = channels;	//channels first so it is inner-most nested, so our images are interleaved rather than planar
 		size(1) = size_(0);
 		size(2) = size_(1);
-		grid = new Grid(size);
+		grid = std::make_shared<Grid>(size);
 		//ugly
 		if (data) {
 			memcpy(grid->v, data, sizeof(Type) * size.volume());
 		}
 	}
 
-	virtual ~ImageType() {
-		delete grid;
-	}
+	virtual ~ImageType() {}
 
 	virtual Tensor::Vector<int,2> getSize() const { return Tensor::Vector<int,2>(size(1), size(2)); }
 	virtual int getChannels() const { return size(0); }
@@ -53,7 +50,8 @@ public:
 	virtual Type *getDataType() { return grid->v; }
 	virtual const Type *getDataType() const { return grid->v; }
 
-	virtual Grid *getGrid() { return grid; }
+	virtual std::shared_ptr<Grid> getGrid() { return grid; }
+	virtual std::shared_ptr<const Grid> getGrid() const { return grid; }
 
 	//it'd be nice to return a vector with size the # of channels
 	// but channels is not a compile time variable, so you have to pick out your elements individually.
