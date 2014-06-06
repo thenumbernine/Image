@@ -46,7 +46,7 @@ public:
 
 	virtual Tensor::Vector<int,2> getSize() const { return Tensor::Vector<int,2>(size(0), size(1)); }
 	virtual int getChannels() const { return size(2); }
-	virtual int getBitsPerPixel() const { return getChannels() * sizeof(Type); }
+	virtual int getBitsPerPixel() const { return getChannels() * sizeof(Type) << 3; }
 	
 	virtual char *getData() { return (char*)grid->v; }
 	virtual const char *getData() const { return (char*)grid->v; }
