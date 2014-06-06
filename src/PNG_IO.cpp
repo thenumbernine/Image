@@ -1,3 +1,4 @@
+#if defined(SUPPORT_PNG)
 #include "Image/IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -185,3 +186,5 @@ void PNG_IO::write(std::string filename, const IImage *img) {
 Common::Singleton<PNG_IO> pngIO;
 
 };
+#endif	//SUPPORT_PNG
+

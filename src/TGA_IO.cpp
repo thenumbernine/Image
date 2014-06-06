@@ -1,3 +1,4 @@
+#if defined(SUPPORT_TGA)
 #include "Image/IO.h"
 #include "Common/Exception.h"
 #include <fstream>
@@ -125,3 +126,5 @@ struct TGA_IO : public IO {
 static Common::Singleton<TGA_IO> tgaIO;
 
 };
+#endif	//SUPPORT_TGA
+

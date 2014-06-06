@@ -1,4 +1,4 @@
-#if 0	//I'm having trouble linking against this, and I backed myself into a Makefile corner with declaring/removing source files, so the ol' #if 0 is my best option
+#if defined(SUPPORT_JPEG)
 #include "Common/Exception.h"
 #include "Common/Finally.h"
 #include "Image/Image.h"
@@ -36,7 +36,7 @@ struct JPEG_IO : public IO {
 #endif
 };
 
-//////// begin jpeglib example rip
+//////// begin jpeglib example
 
 struct my_error_mgr {
 	struct jpeg_error_mgr pub;	/* "public" fields */
@@ -63,7 +63,7 @@ static void my_error_exit (j_common_ptr cinfo) {
 	longjmp(myerr->setjmp_buffer, 1);
 }
 
-//////// end jpeglib example rip
+//////// end jpeglib example
 
 bool JPEG_IO::supportsExtension(std::string extension) {
 	return !strcasecmp(extension.c_str(), "jpeg")
@@ -135,7 +135,7 @@ IImage *JPEG_IO::readFromMemory(const char *buffer, size_t size) {
 		//	jpeg_stdio_src(&cinfo, fp);
 		//replacement codepiece
 
-		//ripped from jpeg_stdio_src
+		//taken from jpeg_stdio_src
 		{
 			//	STRUCTURE
 			
@@ -263,5 +263,5 @@ IImage *JPEG_IO::readFromMemory(const char *buffer, size_t size) {
 Common::Singleton<JPEG_IO> jpegIO;
 
 };
-#endif
+#endif	//SUPPORT_JPEG
 

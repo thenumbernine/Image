@@ -1,3 +1,4 @@
+#if defined(SUPPORT_TIFF)
 #include "Image/IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -76,4 +77,5 @@ void TIFF_IO::write(std::string filename, const IImage *img) {
 Singleton<TIFF_IO> tiffIO;
 
 };
+#endif	//SUPPORT_TIFF
 

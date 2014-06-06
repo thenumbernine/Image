@@ -1,3 +1,4 @@
+#if defined(SUPPORT_PPM)
 #include "Image/IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -69,3 +70,5 @@ struct PPM_IO : public IO {
 static Common::Singleton<PPM_IO> ppmIO;
 
 };
+#endif	//SUPPORT_PPM
+

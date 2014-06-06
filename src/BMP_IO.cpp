@@ -1,3 +1,4 @@
+#if defined(SUPPORT_BMP)
 #include "Image/IO.h"
 #include "Image/Image.h"
 #include <fstream>
@@ -150,4 +151,5 @@ struct BMP_IO : public IO {
 static Common::Singleton<BMP_IO> bmpIO;
 
 };
+#endif //SUPPORT_BMP
 
