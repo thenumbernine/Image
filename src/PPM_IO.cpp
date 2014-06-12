@@ -67,7 +67,8 @@ struct PPM_IO : public IO {
 		throw Common::Exception() << "not implemented yet";
 	}
 };
-static Common::Singleton<PPM_IO> ppmIO;
+
+Common::Singleton<PPM_IO> ppmIO;
 
 };
 #endif	//SUPPORT_PPM

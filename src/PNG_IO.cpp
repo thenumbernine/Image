@@ -1,5 +1,5 @@
 #if defined(SUPPORT_PNG)
-#include "Image/IO.h"
+#include "Image/PNG_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
 #include <stdio.h>
@@ -15,13 +15,9 @@
 
 namespace Image {
 
-struct PNG_IO : public IO {
-	virtual ~PNG_IO(){}
-	virtual std::string name() { return "PNG_IO"; }
-	virtual bool supportsExtension(std::string extension);
-	virtual std::shared_ptr<IImage> read(std::string filename);
-	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
-};
+PNG_IO::~PNG_IO() {}
+
+std::string PNG_IO::name() { return "PNG_IO"; }
 
 #if 0
 static int read_chunk_callback(png_infop ptr,

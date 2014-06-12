@@ -1,7 +1,7 @@
 #if defined(SUPPORT_FITS)
+#include "Image/FITS_IO.h"
 #include "Common/Exception.h"
 #include "Common/File.h"
-#include "Image/IO.h"
 #include "Tensor/Vector.h"
 #include <vector>
 
@@ -19,13 +19,9 @@ extern "C" {
 
 namespace Image {
 
-struct FITS_IO : public IO {
-	virtual ~FITS_IO() {}
-	virtual std::string name() { return "FITS_IO"; }
-	virtual bool supportsExtension(std::string extension);
-	virtual std::shared_ptr<IImage> read(std::string filename);
-	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
-};
+FITS_IO::~FITS_IO() {}
+
+std::string FITS_IO::name() { return "FITS_IO"; }
 
 bool FITS_IO::supportsExtension(std::string extension) {
 	return !strcasecmp(extension.c_str(), "fits");
@@ -147,7 +143,7 @@ std::shared_ptr<IImage> FITS_IO::read(std::string filename) {
 	return img;
 }
 
-static void writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int DIM) {
+void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int DIM) {
 
 	if (Common::File::exists(filename)) {
 		Common::File::remove(filename);
@@ -207,7 +203,7 @@ void FITS_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
 	CHECK_SAVE_TYPE(double, TDOUBLE, DOUBLE_IMG, 1)
 	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 2>, TDOUBLE, DOUBLE_IMG, 2)
 	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 3>, TDOUBLE, DOUBLE_IMG, 3)
-	
+
 	throw Common::Exception() << "failed to find RTTI for image";
 }
 

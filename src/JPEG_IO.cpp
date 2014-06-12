@@ -1,8 +1,7 @@
 #if defined(SUPPORT_JPEG)
+#include "Image/JPEG_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
-#include "Image/Image.h"
-#include "Image/IO.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,19 +21,9 @@ extern "C" {
 
 namespace Image {
 
-struct JPEG_IO : public IO {
-	virtual ~JPEG_IO(){}
-	virtual std::string name() { return "JPEG_IO"; }
-	virtual bool supportsExtension(std::string extension);
-	virtual std::shared_ptr<IImage> read(std::string filename);
-	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
+JPEG_IO::~JPEG_IO() {}
 
-#ifndef WIN32
-	//special-case for this loader
-	//useful when you download a jpeg and dont want to write it to disk to read it again
-	std::shared_ptr<IImage> readFromMemory(const char *buffer, size_t size);
-#endif
-};
+std::string JPEG_IO::name() { return "JPEG_IO"; }
 
 //////// begin jpeglib example
 

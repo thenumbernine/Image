@@ -1,5 +1,5 @@
 #if defined(SUPPORT_TIFF)
-#include "Image/IO.h"
+#include "Image/TIFF_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
 #include <tiff.h>
@@ -11,19 +11,11 @@
 #define strcasecmp _stricmp
 #endif
 
-using namespace Common;
-
 namespace Image {
 
-struct TIFF_IO : public IO {
-	virtual ~TIFF_IO(){}
-	virtual std::string name(void) { return "TIFF_IO"; }
-	virtual bool supportsExtension(std::string extension);
-	virtual std::shared_ptr<IImage> read(std::string filename);
-	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
-};
-
-using namespace std;
+TIFF_IO::~TIFF_IO() {}
+	
+std::string TIFF_IO::name(void) { return "TIFF_IO"; }
 
 bool TIFF_IO::supportsExtension(std::string extension) {
 	return !strcasecmp(extension.c_str(), "tif")
@@ -33,7 +25,7 @@ bool TIFF_IO::supportsExtension(std::string extension) {
 std::shared_ptr<IImage> TIFF_IO::read(std::string filename) {
 	try {
 		TIFF *tiff = TIFFOpen(filename.c_str(), "r");
-		if (!tiff) throw Exception() << " couldn't open file " << filename;
+		if (!tiff) throw Common::Exception() << " couldn't open file " << filename;
 		Common::Finally tiffFinally([&](){ TIFFClose(tiff); });
 
 		uint32 width = 0;
@@ -48,7 +40,7 @@ std::shared_ptr<IImage> TIFF_IO::read(std::string filename) {
 		std::vector<unsigned char> imgdata(height * width * 4);
 		
 		if (!TIFFReadRGBAImageOriented(tiff, width, height, (uint32*)&imgdata[0], ORIENTATION_TOPLEFT, 0)) {
-			throw Exception() << " failed to read the image into a RGBA format";
+			throw Common::Exception() << " failed to read the image into a RGBA format";
 		}
 
 		if (bytespp == 3) {
@@ -65,16 +57,16 @@ std::shared_ptr<IImage> TIFF_IO::read(std::string filename) {
 		}
 		//img's existence signifies that we've made it
 		return std::make_shared<Image>(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
-	} catch (const exception &t) {
-		throw Exception() << "TIFF_IO::read(" << filename << ") error: " << t.what();
+	} catch (const std::exception &t) {
+		throw Common::Exception() << "TIFF_IO::read(" << filename << ") error: " << t.what();
 	}	
 }
 
 void TIFF_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
-	throw Exception() << "not implemented yet";
+	throw Common::Exception() << "not implemented yet";
 }
 
-Singleton<TIFF_IO> tiffIO;
+Common::Singleton<TIFF_IO> tiffIO;
 
 };
 #endif	//SUPPORT_TIFF
