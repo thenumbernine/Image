@@ -5,11 +5,6 @@
 #include "Tensor/Vector.h"
 #include <vector>
 
-#define __CINT__
-extern "C" {
-#include <fitsio.h>
-}
-
 // http://www.mitchr.me/SS/exampleCode/cfitsio/fits2tga.c.html
 // http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node40.html#ffgidt
 
