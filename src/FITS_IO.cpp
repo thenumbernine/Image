@@ -85,49 +85,19 @@ std::shared_ptr<IImage> FITS_IO::read(std::string filename) {
 	std::shared_ptr<IImage> img;
 	switch (bitPixType) {
 	case BYTE_IMG:
-		switch (channels) {
-		case 1: img = std::make_shared<ImageType<char>>(size); break;
-		case 2: img = std::make_shared<ImageType<Tensor::Vector<char,2>>>(size); break;
-		case 3: img = std::make_shared<ImageType<Tensor::Vector<char,3>>>(size); break;
-		default:
-			throw Common::Exception() << "unsupported channels for byte type: " << channels;
-		}
+		img = std::make_shared<ImageType<char>>(size, nullptr, channels, 1);
 		break;
 	case SHORT_IMG:
-		switch (channels) {
-		case 1: img = std::make_shared<ImageType<short>>(size); break;
-		case 2: img = std::make_shared<ImageType<Tensor::Vector<short,2>>>(size); break;
-		case 3: img = std::make_shared<ImageType<Tensor::Vector<short,3>>>(size); break;
-		default:
-			throw Common::Exception() << "unsupported channels for short type: " << channels;
-		}
+		img = std::make_shared<ImageType<short>>(size, nullptr, channels, 1);
 		break;
 	case LONG_IMG:
-		switch (channels) {
-		case 1: img = std::make_shared<ImageType<int>>(size); break;
-		case 2: img = std::make_shared<ImageType<Tensor::Vector<int,2>>>(size); break;
-		case 3: img = std::make_shared<ImageType<Tensor::Vector<int,3>>>(size); break;
-		default:
-			throw Common::Exception() << "unsupported channels for int type: " << channels;
-		}
+		img = std::make_shared<ImageType<int>>(size, nullptr, channels, 1);
 		break;
 	case FLOAT_IMG:
-		switch (channels) {
-		case 1: img = std::make_shared<ImageType<float>>(size); break;
-		case 2: img = std::make_shared<ImageType<Tensor::Vector<float,2>>>(size); break;
-		case 3: img = std::make_shared<ImageType<Tensor::Vector<float,3>>>(size); break;
-		default:
-			throw Common::Exception() << "unsupported channels for float type: " << channels;
-		}
+		img = std::make_shared<ImageType<float>>(size, nullptr, channels, 1);
 		break;
 	case DOUBLE_IMG:
-		switch (channels) {
-		case 1: img = std::make_shared<ImageType<double>>(size); break;
-		case 2: img = std::make_shared<ImageType<Tensor::Vector<double,2>>>(size); break;
-		case 3: img = std::make_shared<ImageType<Tensor::Vector<double,3>>>(size); break;
-		default:
-			throw Common::Exception() << "unsupported channels for double type: " << channels;
-		}
+		img = std::make_shared<ImageType<double>>(size, nullptr, channels, 1);
 		break;
 	default:
 		throw Common::Exception() << "uncoded read type " << bitPixType;
@@ -138,7 +108,7 @@ std::shared_ptr<IImage> FITS_IO::read(std::string filename) {
 	return img;
 }
 
-void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int DIM) {
+void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int dim) {
 
 	if (Common::File::exists(filename)) {
 		Common::File::remove(filename);
@@ -150,7 +120,7 @@ void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img,
 	ffinit(&fitsFilePtr, filename.c_str(), &status);
 	if (status) throw Common::Exception() << "ffinit failed with " << status;
 
-	long sizes[3] = {img->getSize()(0), img->getSize()(1), DIM};
+	long sizes[3] = {img->getSize()(0), img->getSize()(1), dim};
 	
 	status = ffphps(fitsFilePtr, bitPixType, 3, sizes, &status);
 	if (status) throw Common::Exception() << "ffphps failed with " << status;
@@ -160,7 +130,7 @@ void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img,
 		firstpix[i] = 1;
 	}
 	
-	int numPixels = img->getSize()(0) * img->getSize()(1) * DIM;
+	int numPixels = img->getSize()(0) * img->getSize()(1) * dim;
 	
 	ffppx(fitsFilePtr, imgType, firstpix, numPixels, (void*)img->getData(), &status);
 	if (status) throw Common::Exception() << "ffppx failed with " << status;
@@ -174,30 +144,11 @@ but all we have is channel size, not type ...
 time to dynamic-cast and find the right type ...
 */
 void FITS_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
-#define CHECK_SAVE_TYPE(T, imgType, bitPixType, DIM)	\
-	{	\
-		std::shared_ptr<const ImageType<T>> img_ = std::dynamic_pointer_cast<const ImageType<T>>(img);	\
-		if (img_) {	\
-			writeType(filename, img, imgType, bitPixType, DIM);	\
-			return;	\
-		}	\
-	}
-#define COMMA ,
-	CHECK_SAVE_TYPE(char, TBYTE, BYTE_IMG, 1)
-	CHECK_SAVE_TYPE(Tensor::Vector<char COMMA 2>, TBYTE, BYTE_IMG, 2)
-	CHECK_SAVE_TYPE(Tensor::Vector<char COMMA 3>, TBYTE, BYTE_IMG, 3)
-	CHECK_SAVE_TYPE(short, TSHORT, SHORT_IMG, 1)
-	CHECK_SAVE_TYPE(Tensor::Vector<short COMMA 2>, TSHORT, SHORT_IMG, 2)
-	CHECK_SAVE_TYPE(Tensor::Vector<short COMMA 3>, TSHORT, SHORT_IMG, 3)
-	CHECK_SAVE_TYPE(int, TLONG, LONG_IMG, 1)
-	CHECK_SAVE_TYPE(Tensor::Vector<int COMMA 2>, TLONG, LONG_IMG, 2)
-	CHECK_SAVE_TYPE(Tensor::Vector<int COMMA 3>, TLONG, LONG_IMG, 3)
-	CHECK_SAVE_TYPE(float, TFLOAT, FLOAT_IMG, 1)
-	CHECK_SAVE_TYPE(Tensor::Vector<float COMMA 2>, TFLOAT, FLOAT_IMG, 2)
-	CHECK_SAVE_TYPE(Tensor::Vector<float COMMA 3>, TFLOAT, FLOAT_IMG, 3)
-	CHECK_SAVE_TYPE(double, TDOUBLE, DOUBLE_IMG, 1)
-	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 2>, TDOUBLE, DOUBLE_IMG, 2)
-	CHECK_SAVE_TYPE(Tensor::Vector<double COMMA 3>, TDOUBLE, DOUBLE_IMG, 3)
+	if (checkSaveType<char>(filename, img)) return;
+	if (checkSaveType<short>(filename, img)) return;
+	if (checkSaveType<int>(filename, img)) return;
+	if (checkSaveType<float>(filename, img)) return;
+	if (checkSaveType<double>(filename, img)) return;
 
 	throw Common::Exception() << "failed to find RTTI for image";
 }

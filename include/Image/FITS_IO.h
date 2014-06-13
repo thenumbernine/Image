@@ -36,18 +36,26 @@ struct FITS_IO : public IO {
 	*/
 	virtual void write(std::string filename, std::shared_ptr<const IImage> img);
 
+protected:
 	/*
-	Templated write function
+	Used by write 
 	*/
-	template<typename Type, int rank>
-	void writeImage(std::string filename, std::shared_ptr<const ImageType<Tensor::Vector<Type, rank>>> img) {
-		writeType(filename, img, fitsType<Type>::value, fitsImage<Type>::value, rank);
+	template<typename T>
+	bool checkSaveType(std::string filename, std::shared_ptr<const IImage> img) {
+		std::shared_ptr<const ImageType<T>> img_ = std::dynamic_pointer_cast<const ImageType<T>>(img);
+		if (img_) {
+			writeType(filename, img, fitsType<T>::value, fitsImage<T>::value, img->getPlanes());
+			return true;
+		}
+		return false;
 	}
+
+public:
 
 	/*
 	Underlying write function that the other functions call.
 	*/
-	virtual void writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int DIM);
+	virtual void writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int dim);
 };
 
 extern Common::Singleton<FITS_IO> fitsIO;
