@@ -38,11 +38,11 @@ BMP_IO::~BMP_IO() {}
 	
 std::string BMP_IO::name() { return "BMP_IO"; }
 	
-bool BMP_IO::supportsExtension(std::string extension) {
+bool BMP_IO::supportsExtension(const std::string& extension) {
 	return !strcasecmp(extension.c_str(), "bmp");
 }
 	
-std::shared_ptr<IImage> BMP_IO::read(std::string filename) {
+std::shared_ptr<IImage> BMP_IO::read(const std::string& filename) {
 
 	//list out resources we have to free here:
 	try {
@@ -109,7 +109,7 @@ std::shared_ptr<IImage> BMP_IO::read(std::string filename) {
 	}
 }
 	
-void BMP_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
+void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
 	try {
 		if (img->getBitsPerPixel() < 24) throw Common::Exception() << "don't support writing for " << img->getBitsPerPixel() << " bits per pixel yet";
 

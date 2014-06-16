@@ -4,7 +4,7 @@
 
 namespace Image {
 
-std::shared_ptr<IImage> System::read(std::string filename) {
+std::shared_ptr<IImage> System::read(const std::string& filename) {
 	std::string ext = Common::File::getExtension(filename);
 
 	try {
@@ -18,7 +18,7 @@ std::shared_ptr<IImage> System::read(std::string filename) {
 	}
 }
 
-void System::write(std::string filename, std::shared_ptr<const IImage> image) {
+void System::write(const std::string& filename, std::shared_ptr<const IImage> image) {
 	std::string ext = Common::File::getExtension(filename);
 
 	try {

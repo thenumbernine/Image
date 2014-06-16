@@ -19,10 +19,10 @@ public:
 	System() : baseIO(NULL) {}
 
 	//access to loading an image from our chain:
-	std::shared_ptr<IImage> read(std::string filename);
+	std::shared_ptr<IImage> read(const std::string& filename);
 	
 	//save an image
-	void write(std::string filename, std::shared_ptr<const IImage> image);
+	void write(const std::string& filename, std::shared_ptr<const IImage> image);
 };
 extern Common::Singleton<System> system;
 

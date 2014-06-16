@@ -16,11 +16,11 @@ TGA_IO::~TGA_IO() {}
 
 std::string TGA_IO::name() { return "TGA_IO"; }
 	
-bool TGA_IO::supportsExtension(std::string extension) {
+bool TGA_IO::supportsExtension(const std::string& extension) {
 	return !strcasecmp(extension.c_str(), "tga");
 }
 	
-std::shared_ptr<IImage> TGA_IO::read(std::string filename) {
+std::shared_ptr<IImage> TGA_IO::read(const std::string& filename) {
 	try {
 		std::ifstream file(filename, std::ios::binary);
 		if (!file) throw Common::Exception() << "unable to open file";
@@ -122,7 +122,7 @@ std::shared_ptr<IImage> TGA_IO::read(std::string filename) {
 	}
 }
 	
-void TGA_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
+void TGA_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
 	throw Common::Exception() << "not implemented yet";
 }
 

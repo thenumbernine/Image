@@ -54,12 +54,12 @@ static void my_error_exit (j_common_ptr cinfo) {
 
 //////// end jpeglib example
 
-bool JPEG_IO::supportsExtension(std::string extension) {
+bool JPEG_IO::supportsExtension(const std::string& extension) {
 	return !strcasecmp(extension.c_str(), "jpeg")
 		|| !strcasecmp(extension.c_str(), "jpg");
 }
 
-std::shared_ptr<IImage> JPEG_IO::read(std::string filename) {
+std::shared_ptr<IImage> JPEG_IO::read(const std::string& filename) {
 	try {
 		FILE *file = fopen(filename.c_str(), "rb");
 		if (!file) throw Common::Exception() << "couldn't open file " << filename;
@@ -98,7 +98,7 @@ std::shared_ptr<IImage> JPEG_IO::read(std::string filename) {
 	}
 }
 
-void JPEG_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
+void JPEG_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
 	throw Common::Exception() << "not implemented yet";
 }
 

@@ -29,7 +29,7 @@ protected:
 public:
 
 	//returns whether or not we can load the file, based on matching extension
-	virtual bool supportsExtension(std::string extension) = 0;
+	virtual bool supportsExtension(const std::string& extension) = 0;
 
 	//return the name of the loader, for identification
 	virtual std::string name() = 0;
@@ -37,11 +37,11 @@ public:
 	//returns the image in the file.
 	//throws an exception if it fails
 	//if it returns, you should be able to assert the image and its data exist
-	virtual std::shared_ptr<IImage> read(std::string filename) = 0;
+	virtual std::shared_ptr<IImage> read(const std::string& filename) = 0;
 	
 	//saves the image to the specified file
 	//throws an exception if it fails
-	virtual void write(std::string filename, std::shared_ptr<const IImage> img) = 0;
+	virtual void write(const std::string& filename, std::shared_ptr<const IImage> img) = 0;
 };
 
 };

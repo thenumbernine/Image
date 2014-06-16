@@ -16,10 +16,10 @@ namespace Image {
 struct PPM_IO : public IO {
 	virtual ~PPM_IO(){}
 	virtual std::string name() { return "PPM_IO"; }
-	virtual bool supportsExtension(std::string extension) {
+	virtual bool supportsExtension(const std::string& extension) {
 		return !strcasecmp(extension.c_str(), "ppm");
 	}
-	virtual std::shared_ptr<IImage> read(std::string filename) {
+	virtual std::shared_ptr<IImage> read(const std::string& filename) {
 		try {
 			
 			int h,w, maxVal;
@@ -63,7 +63,7 @@ struct PPM_IO : public IO {
 			throw Common::Exception() << "PPM_IO::read(" << filename << ") error: " << t.what();
 		}
 	}
-	virtual void write(std::string filename, std::shared_ptr<const IImage> img) {
+	virtual void write(const std::string& filename, std::shared_ptr<const IImage> img) {
 		throw Common::Exception() << "not implemented yet";
 	}
 };

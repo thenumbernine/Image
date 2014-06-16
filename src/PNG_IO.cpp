@@ -41,11 +41,11 @@ static int read_chunk_callback(png_infop ptr,
 }
 #endif
 
-bool PNG_IO::supportsExtension(std::string extension) {
+bool PNG_IO::supportsExtension(const std::string& extension) {
 	return !strcasecmp(extension.c_str(), "png");
 }
 
-std::shared_ptr<IImage> PNG_IO::read(std::string filename) {		
+std::shared_ptr<IImage> PNG_IO::read(const std::string& filename) {		
 	try {
 		FILE *file = fopen(filename.c_str(), "rb");
 		if (!file) throw Common::Exception() << "couldn't open file " << filename;
@@ -122,7 +122,7 @@ std::shared_ptr<IImage> PNG_IO::read(std::string filename) {
 	}
 }
 
-void PNG_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
+void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
 	try {
 		FILE *file = fopen(filename.c_str(), "wb");
 		if (!file) throw Common::Exception() << "could not be opened for writing";

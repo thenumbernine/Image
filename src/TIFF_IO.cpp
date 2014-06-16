@@ -17,12 +17,12 @@ TIFF_IO::~TIFF_IO() {}
 	
 std::string TIFF_IO::name(void) { return "TIFF_IO"; }
 
-bool TIFF_IO::supportsExtension(std::string extension) {
+bool TIFF_IO::supportsExtension(const std::string& extension) {
 	return !strcasecmp(extension.c_str(), "tif")
 		|| !strcasecmp(extension.c_str(), "tiff");
 }
 
-std::shared_ptr<IImage> TIFF_IO::read(std::string filename) {
+std::shared_ptr<IImage> TIFF_IO::read(const std::string& filename) {
 	try {
 		TIFF *tiff = TIFFOpen(filename.c_str(), "r");
 		if (!tiff) throw Common::Exception() << " couldn't open file " << filename;
@@ -62,7 +62,7 @@ std::shared_ptr<IImage> TIFF_IO::read(std::string filename) {
 	}	
 }
 
-void TIFF_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
+void TIFF_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
 	throw Common::Exception() << "not implemented yet";
 }
 

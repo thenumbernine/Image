@@ -18,11 +18,11 @@ FITS_IO::~FITS_IO() {}
 
 std::string FITS_IO::name() { return "FITS_IO"; }
 
-bool FITS_IO::supportsExtension(std::string extension) {
+bool FITS_IO::supportsExtension(const std::string& extension) {
 	return !strcasecmp(extension.c_str(), "fits");
 }
 
-std::shared_ptr<IImage> FITS_IO::read(std::string filename) {
+std::shared_ptr<IImage> FITS_IO::read(const std::string& filename) {
 	fitsfile *fitsFilePtr;
 	int status = 0;
 	ffopen(&fitsFilePtr, filename.c_str(), READONLY, &status);
@@ -108,7 +108,7 @@ std::shared_ptr<IImage> FITS_IO::read(std::string filename) {
 	return img;
 }
 
-void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int dim) {
+void FITS_IO::writeType(const std::string& filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int dim) {
 
 	if (Common::File::exists(filename)) {
 		Common::File::remove(filename);
@@ -143,7 +143,7 @@ void FITS_IO::writeType(std::string filename, std::shared_ptr<const IImage> img,
 but all we have is channel size, not type ...
 time to dynamic-cast and find the right type ...
 */
-void FITS_IO::write(std::string filename, std::shared_ptr<const IImage> img) {
+void FITS_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
 	if (checkSaveType<char>(filename, img)) return;
 	if (checkSaveType<short>(filename, img)) return;
 	if (checkSaveType<int>(filename, img)) return;
