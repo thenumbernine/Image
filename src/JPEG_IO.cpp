@@ -12,7 +12,6 @@ extern "C" {
 #endif
 }
 #include <setjmp.h>
-
 #include <vector>
 
 #ifdef WIN32

@@ -3,6 +3,8 @@
 #include "Tensor/Grid.h"
 #include "Tensor/Vector.h"
 #include "Common/Meta.h"
+#include <string.h>
+#include <memory>
 #include <type_traits>
 
 namespace Image {
