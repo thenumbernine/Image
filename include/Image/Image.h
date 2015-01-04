@@ -18,6 +18,7 @@ struct IImage {
 	virtual int getBitsPerPixel() const { return getChannels() << 3; }
 	virtual char *getData() = 0;
 	virtual const char *getData() const = 0;
+	virtual size_t getDataSize() = 0;
 };
 
 template<typename Type_ = char>
@@ -36,7 +37,7 @@ public:
 		grid = std::make_shared<Grid>(size);
 		//ugly
 		if (data) {
-			memcpy(grid->v, data, sizeof(Type) * size.volume());
+			memcpy(grid->v, data, getDataSize());
 		}
 	}
 
@@ -51,6 +52,7 @@ public:
 	virtual const char *getData() const { return (char*)grid->v; }
 	virtual Type *getDataType() { return grid->v; }
 	virtual const Type *getDataType() const { return grid->v; }
+	virtual size_t getDataSize() { return sizeof(Type) * size.volume(); }
 
 	virtual std::shared_ptr<Grid> getGrid() { return grid; }
 	virtual std::shared_ptr<const Grid> getGrid() const { return grid; }
