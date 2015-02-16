@@ -32,6 +32,7 @@ I'll switch to something else later
 */
 
 #include <lua.hpp>
+#include "Common/Macros.h"
 #include "Image/System.h"
 #include "Tensor/Vector.h"
 
@@ -392,7 +393,7 @@ static int binding___gc(lua_State *L) {
 }
 
 #define BINDING(x)	{#x, binding_##x}
-luaL_Reg binding_img[] = {
+static luaL_Reg bindings[] = {
 	BINDING(new),
 	BINDING(load),
 	BINDING(save),
@@ -403,26 +404,25 @@ luaL_Reg binding_img[] = {
 	BINDING(dataptr),
 	BINDING(__gc),
 	BINDING(__call),
-	{nullptr,nullptr}
 };
 
 extern "C" {
 #ifdef WIN32
 __declspec(dllexport)
 #endif
-int luaopen_img(lua_State *L) {
+int luaopen_libImageLua(lua_State *L) {
 	lua_newtable(L);	//img
-	for (luaL_Reg* reg = binding_img; *reg->name; ++reg) {
-		lua_pushcfunction(L, reg->func);	//img func
-		lua_setfield(L, lua_gettop(L)-1, reg->name);	//img, img[name] = func
+	for (int i = 0; i < numberof(bindings); ++i) {
+		lua_pushcfunction(L, bindings[i].func);	//img func
+		lua_setfield(L, lua_gettop(L)-1, bindings[i].name);	//img, img[name] = func
 	}
 	//img
 	
-	lua_pushvalue(L, -1);	//img img
-	lua_setfield(L, -2, "__index");	//img, img.__index = img
+	lua_pushvalue(L, -1);	//stack: img img
+	lua_setfield(L, -2, "__index");	//img.__index = img, stack : img
 	
-	lua_pushvalue(L, -1);
-	imgref = luaL_ref(L, LUA_REGISTRYINDEX);
+	lua_pushvalue(L, -1);	//stack: img img
+	imgref = luaL_ref(L, LUA_REGISTRYINDEX);	//registery[imgref] = img, stack : img
 	
 	return 1;
 }

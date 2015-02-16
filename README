@@ -4,3 +4,7 @@ I'm slowly accumulating formats.
 The only one I really care about is FITS.
 Currently supports some reading of: bmp, fits, jpeg, png, ppm, tga, and tiff
 Supports writing of some of those.
+
+luabindings has a lib for bindings to lua
+includes the LuaCxx to link to lua
+make sure you build LuaCxx with the appropriate Lua that you're going to use (Lua v.whatever vs LuaJIT) this with
