@@ -75,7 +75,7 @@ std::shared_ptr<IImage> TGA_IO::read(const std::string& filename) {
 			if (bitsPerPixel == 8) {
 				char t;
 				for (x = 0; x < (int)width; x++) {
-					if (!file.read(&t, 1) != 1) throw Common::Exception() << "error in reading this TGA";
+					if (!file.read(&t, 1)) throw Common::Exception() << "error in reading this TGA";
 
 					if (header[1] == 0 && header[2] == 3) {	//greyscale 8bit image
 						rowPtr[2] = rowPtr[1] = rowPtr[0] = t;

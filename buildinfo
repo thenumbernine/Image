@@ -1,0 +1,52 @@
+distName='Image'
+distType='lib'
+depends:append{'../Common', '../Tensor'}
+
+-- TODO remember these for the depend() environment
+Image_support_bmp = true
+Image_support_fits = true
+Image_support_jpeg = true
+Image_support_png = true
+Image_support_ppm = true
+Image_support_tga = true
+Image_support_tiff = true
+
+if Image_support_bmp then
+	macros:insert'SUPPORT_BMP'
+end
+if Image_support_fits then
+	macros:insert'SUPPORT_FITS'
+end
+if Image_support_jpeg then
+	macros:insert'SUPPORT_JPEG'
+end
+if Image_support_png then
+	macros:insert'SUPPORT_PNG'
+end
+if Image_support_ppm then
+	macros:insert'SUPPORT_PPM'
+end
+if Image_support_tga then
+	macros:insert'SUPPORT_TGA'
+end
+if Image_support_tiff then
+	macros:insert'SUPPORT_TIFF'
+end
+
+depend = function(cwd)
+	if Image_support_fits then
+		if platform == 'linux' then
+			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
+		end
+	end
+	if Image_support_png then
+		if platform == 'linux' then
+			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libpng.so'
+		end
+	end
+	if Image_support_tiff then
+		if platform == 'linux' then
+			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libtiff.so'
+		end
+	end
+end

@@ -106,7 +106,7 @@ std::shared_ptr<IImage> PNG_IO::read(const std::string& filename) {
 		//interlaced mode, but i'm memcpying... 
 		for (int pass = 0; pass < num_pass; pass++) {
 			unsigned char *dst = &imgdata[0];
-			for (int y = 0; y < height; y++) {
+			for (int y = 0; y < (int)height; y++) {
 				png_read_rows(png_ptr, (png_bytepp)&row_buf, NULL, 1);
 				memcpy(dst, row_buf, rowbytes);
 				dst += rowbytes;
@@ -160,7 +160,7 @@ void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 
 		std::vector<png_bytep> row_pointers(height);
 		int bytesPerPixel = img->getChannels();
-		for (int y=0; y<height; y++) {
+		for (int y=0; y<(int)height; y++) {
 			row_pointers[y] = (png_byte*)(img->getData() + y * img->getSize()(0) * bytesPerPixel);
 		}
 		
@@ -182,4 +182,3 @@ Common::Singleton<PNG_IO> pngIO;
 
 };
 #endif	//SUPPORT_PNG
-

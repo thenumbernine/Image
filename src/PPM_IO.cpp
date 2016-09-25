@@ -22,9 +22,7 @@ struct PPM_IO : public IO {
 	virtual std::shared_ptr<IImage> read(const std::string& filename) {
 		try {
 			
-			int h,w, maxVal;
 			char sbuf[128];
-			char * tok;
 
 			FILE *file = fopen(filename.c_str(), "r");
 			if (!file) throw Common::Exception() << "failed to open file";
@@ -33,10 +31,12 @@ struct PPM_IO : public IO {
 			fgets(sbuf, sizeof(sbuf), file);
 			fgets(sbuf, sizeof(sbuf), file);
 			fgets(sbuf, sizeof(sbuf), file);
-			tok = strtok (sbuf, " "); w = atoi(tok);
-			tok = strtok (NULL, " "); h = atoi(tok);
+			char* tok = strtok (sbuf, " ");
+			int w = atoi(tok);
+			tok = strtok (NULL, " ");
+			int h = atoi(tok);
 			fgets(sbuf, sizeof(sbuf), file);
-			maxVal = atoi(sbuf);
+			//int maxVal = atoi(sbuf);
 
 			int size = w*h*3;
 		
@@ -72,4 +72,3 @@ Common::Singleton<PPM_IO> ppmIO;
 
 };
 #endif	//SUPPORT_PPM
-
