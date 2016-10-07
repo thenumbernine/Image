@@ -4,12 +4,12 @@ depends:append{'../Common', '../Tensor'}
 
 -- TODO remember these for the depend() environment
 Image_support_bmp = true
-Image_support_fits = true
-Image_support_jpeg = true
+Image_support_fits = platform ~= 'msvc' and platform ~= 'mingw'
+Image_support_jpeg = platform ~= 'msvc' and platform ~= 'mingw'
 Image_support_png = true
 Image_support_ppm = true
 Image_support_tga = true
-Image_support_tiff = true
+Image_support_tiff = platform ~= 'msvc' and platform ~= 'mingw'
 
 if Image_support_bmp then
 	macros:insert'SUPPORT_BMP'
@@ -32,8 +32,18 @@ end
 if Image_support_tiff then
 	macros:insert'SUPPORT_TIFF'
 end
-
-depend = function(cwd)
+if platform == 'msvc' then
+	if Image_support_png then
+		dynamicLibs:insert(cwd..'/../libpng1625/libpng.lib')
+	end
+end
+if not including then
+	if Image_support_png
+	and platform == 'msvc'
+	then
+		include:insert(cwd..'/../libpng1625')
+	end
+else
 	if Image_support_fits then
 		if platform == 'linux' then
 			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'

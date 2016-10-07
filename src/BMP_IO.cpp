@@ -1,9 +1,9 @@
-#if defined(SUPPORT_BMP)
+#ifdef SUPPORT_BMP
 #include "Image/BMP_IO.h"
 #include <fstream>
 #include <vector>
 
-#ifdef WIN32
+#ifdef PLATFORM_msvc
 #define strcasecmp _stricmp
 #endif
 

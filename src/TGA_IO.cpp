@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef WIN32
+#ifdef PLATFORM_msvc
 #define strcasecmp _stricmp
 #endif
 

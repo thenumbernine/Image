@@ -8,7 +8,7 @@
 // http://www.mitchr.me/SS/exampleCode/cfitsio/fits2tga.c.html
 // http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node40.html#ffgidt
 
-#ifdef WIN32
+#ifdef PLATFORM_msvc
 #define strcasecmp _stricmp
 #endif
 

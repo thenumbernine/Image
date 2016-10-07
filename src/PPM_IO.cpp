@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <vector>
 
-#ifdef WIN32
+#ifdef PLATFORM_msvc
 #define strcasecmp _stricmp
 #endif
 

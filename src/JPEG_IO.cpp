@@ -7,14 +7,14 @@
 #include <stdlib.h>
 extern "C" {
 #include <jpeglib.h>
-#ifndef WIN32
+#ifndef PLATFORM_msvc
 #include <jerror.h>
 #endif
 }
 #include <setjmp.h>
 #include <vector>
 
-#ifdef WIN32
+#ifdef PLATFORM_msvc
 #define strcasecmp _stricmp
 #endif
 
@@ -101,7 +101,7 @@ void JPEG_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 	throw Common::Exception() << "not implemented yet";
 }
 
-#ifndef WIN32
+#ifndef PLATFORM_msvc
 
 //if i really wanted i could abstract this to combine with the above code
 //but the above seems to use libjpeg stuff made just for file loading
