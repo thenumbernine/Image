@@ -33,7 +33,7 @@ std::shared_ptr<IImage> TGA_IO::read(const std::string& filename) {
 		//indexed color stuff:
 		std::vector<char> colorMap;
 		if (header[1]) {		//a color map is present - lets read it
-			int colorMapCount = *(unsigned short*)(&header[5]);
+			int colorMapCount = *(unsigned short*)(header+5);
 			int colorMapBits = header[7];
 
 			//my way of rounding up - base 8
@@ -46,8 +46,8 @@ std::shared_ptr<IImage> TGA_IO::read(const std::string& filename) {
 		int RLEcompressed = header[2] & 8;
 		if (RLEcompressed) throw Common::Exception() << "this TGA file just happens to be RLE, which I dont support yet";
 
-		unsigned short width = *(unsigned short*)(&header[12]);
-		unsigned short height = *(unsigned short *)(&header[14]);
+		unsigned short width = *(unsigned short*)(header+12);
+		unsigned short height = *(unsigned short *)(header+14);
 		unsigned int bitsPerPixel = header[16];
 		int src_bytesPerPixel = bitsPerPixel>>3;
 

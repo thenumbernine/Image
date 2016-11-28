@@ -43,20 +43,41 @@ if not including then
 	then
 		include:insert(cwd..'/../libpng1625')
 	end
-else
+
+
 	if Image_support_fits then
 		if platform == 'linux' then
-			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
+			libs:insert'cfitsio'
 		end
 	end
 	if Image_support_png then
 		if platform == 'linux' then
-			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libpng.so'
+			libs:insert'png'
 		end
 	end
 	if Image_support_tiff then
 		if platform == 'linux' then
-			dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libtiff.so'
+			libs:insert'tiff'
+		end
+	end
+
+else
+	if Image_support_fits then
+		if platform == 'linux' then
+			libs:insert'cfitsio'
+			--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
+		end
+	end
+	if Image_support_png then
+		if platform == 'linux' then
+			libs:insert'png'
+			--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libpng.so'
+		end
+	end
+	if Image_support_tiff then
+		if platform == 'linux' then
+			libs:insert'tiff'
+			--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libtiff.so'
 		end
 	end
 end
