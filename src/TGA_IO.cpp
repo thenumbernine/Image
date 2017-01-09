@@ -1,4 +1,4 @@
-#if defined(SUPPORT_TGA)
+#if defined(Image_supports_tga)
 #include "Image/TGA_IO.h"
 #include "Common/Exception.h"
 #include <fstream>
@@ -129,5 +129,4 @@ void TGA_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 Common::Singleton<TGA_IO> tgaIO;
 
 };
-#endif	//SUPPORT_TGA
-
+#endif	//Image_supports_tga

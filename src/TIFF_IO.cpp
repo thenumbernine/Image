@@ -1,4 +1,4 @@
-#if defined(SUPPORT_TIFF)
+#if defined(Image_supports_tiff)
 #include "Image/TIFF_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -69,5 +69,4 @@ void TIFF_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 Common::Singleton<TIFF_IO> tiffIO;
 
 };
-#endif	//SUPPORT_TIFF
-
+#endif	//Image_supports_tiff

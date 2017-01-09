@@ -1,4 +1,4 @@
-#if defined(SUPPORT_JPEG)
+#if defined(Image_supports_jpeg)
 #include "Image/JPEG_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -251,5 +251,4 @@ std::shared_ptr<IImage> JPEG_IO::readFromMemory(const char *buffer, size_t size)
 Common::Singleton<JPEG_IO> jpegIO;
 
 };
-#endif	//SUPPORT_JPEG
-
+#endif	//Image_supports_jpeg

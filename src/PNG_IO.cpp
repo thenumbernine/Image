@@ -1,4 +1,4 @@
-#if defined(SUPPORT_PNG)
+#if defined(Image_supports_png)
 #include "Image/PNG_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -181,4 +181,4 @@ void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 Common::Singleton<PNG_IO> pngIO;
 
 };
-#endif	//SUPPORT_PNG
+#endif	//Image_supports_png

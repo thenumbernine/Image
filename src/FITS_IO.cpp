@@ -1,4 +1,4 @@
-#if defined(SUPPORT_FITS)
+#if defined(Image_supports_fits)
 #include "Image/FITS_IO.h"
 #include "Common/Exception.h"
 #include "Common/File.h"
@@ -156,5 +156,4 @@ void FITS_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 Common::Singleton<FITS_IO> fitsIO;
 
 };
-#endif	//SUPPORT_FITS
-
+#endif	//Image_supports_fits

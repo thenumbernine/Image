@@ -3,81 +3,43 @@ distType='lib'
 depends:append{'../Common', '../Tensor'}
 
 -- TODO remember these for the depend() environment
-Image_support_bmp = true
-Image_support_fits = platform ~= 'msvc' and platform ~= 'mingw'
-Image_support_jpeg = platform ~= 'msvc' and platform ~= 'mingw'
-Image_support_png = true
-Image_support_ppm = true
-Image_support_tga = true
-Image_support_tiff = platform ~= 'msvc' and platform ~= 'mingw'
 
-if Image_support_bmp then
-	macros:insert'SUPPORT_BMP'
+local not_msvc_or_mingw = platform ~= 'msvc' and platform ~= 'mingw'
+Image_supports = {
+	bmp = {supports=true},
+	fits = {supports=not_msvc_or_mingw},
+	jpeg = {supports=not_msvc_or_mingw},
+	png = {supports=true},
+	ppm = {supports=true},
+	tga = {supports=true},
+	tiff = {supports=not_msvc_or_mingw},
+}
+for format,info in pairs(Image_supports) do
+	if info.supports then
+		macros:insert('Image_supports_'..format)
+	end
 end
-if Image_support_fits then
-	macros:insert'SUPPORT_FITS'
+
+if Image_supports.fits then
+	if platform == 'linux' then
+		libs:insert'cfitsio'
+		--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
+	end
 end
-if Image_support_jpeg then
-	macros:insert'SUPPORT_JPEG'
-end
-if Image_support_png then
-	macros:insert'SUPPORT_PNG'
-end
-if Image_support_ppm then
-	macros:insert'SUPPORT_PPM'
-end
-if Image_support_tga then
-	macros:insert'SUPPORT_TGA'
-end
-if Image_support_tiff then
-	macros:insert'SUPPORT_TIFF'
-end
-if platform == 'msvc' then
-	if Image_support_png then
+if Image_supports.png then
+	if platform == 'linux' then
+		libs:insert'png'
+		--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libpng.so'
+	elseif platform == 'msvc' then
 		dynamicLibs:insert(cwd..'/../libpng1625/libpng.lib')
+		if not including then
+			include:insert(cwd..'/../libpng1625')
+		end
 	end
 end
-if not including then
-	if Image_support_png
-	and platform == 'msvc'
-	then
-		include:insert(cwd..'/../libpng1625')
-	end
-
-
-	if Image_support_fits then
-		if platform == 'linux' then
-			libs:insert'cfitsio'
-		end
-	end
-	if Image_support_png then
-		if platform == 'linux' then
-			libs:insert'png'
-		end
-	end
-	if Image_support_tiff then
-		if platform == 'linux' then
-			libs:insert'tiff'
-		end
-	end
-
-else
-	if Image_support_fits then
-		if platform == 'linux' then
-			libs:insert'cfitsio'
-			--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
-		end
-	end
-	if Image_support_png then
-		if platform == 'linux' then
-			libs:insert'png'
-			--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libpng.so'
-		end
-	end
-	if Image_support_tiff then
-		if platform == 'linux' then
-			libs:insert'tiff'
-			--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libtiff.so'
-		end
+if Image_supports.tiff then
+	if platform == 'linux' then
+		libs:insert'tiff'
+		--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libtiff.so'
 	end
 end

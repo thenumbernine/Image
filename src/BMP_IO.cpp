@@ -1,4 +1,4 @@
-#ifdef SUPPORT_BMP
+#if defined(Image_supports_bmp)
 #include "Image/BMP_IO.h"
 #include <fstream>
 #include <vector>
@@ -153,5 +153,4 @@ void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 Common::Singleton<BMP_IO> bmpIO;
 
 };
-#endif //SUPPORT_BMP
-
+#endif //Image_supports_bmp
