@@ -22,7 +22,7 @@ int main() {
 	std::vector<std::string> readExts = {
 		"bmp",
 		"fits",
-		//"jpeg",	//link errors
+		"jpeg",
 		"png",
 		"ppm",
 		"tga",

@@ -22,8 +22,15 @@ end
 
 if Image_supports.fits then
 	if platform == 'linux' then
-		libs:insert'cfitsio'
 		--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
+	end
+	if platform == 'osx' then
+		dynamicLibs:insert(os.getenv'HOME'..'/lib/libcfitsio.5.3.41.dylib')
+	end
+end
+if Image_supports.jpeg then
+	if platform == 'osx' then
+		dynamicLibs:insert(os.getenv'HOME'..'/lib/libjpeg.9.dylib')
 	end
 end
 if Image_supports.png then
