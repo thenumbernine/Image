@@ -22,6 +22,7 @@ end
 
 if Image_supports.fits then
 	if platform == 'linux' then
+		libs:insert'cfitsio'
 		--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libcfitsio.so'
 	end
 	if platform == 'osx' then

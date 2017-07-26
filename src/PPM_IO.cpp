@@ -28,14 +28,14 @@ struct PPM_IO : public IO {
 			if (!file) throw Common::Exception() << "failed to open file";
 			Common::Finally finally([&](){ fclose(file); });
 
-			fgets(sbuf, sizeof(sbuf), file);
-			fgets(sbuf, sizeof(sbuf), file);
-			fgets(sbuf, sizeof(sbuf), file);
+			if (!fgets(sbuf, sizeof(sbuf), file)) throw Common::Exception() << "fgets failed";
+			if (!fgets(sbuf, sizeof(sbuf), file)) throw Common::Exception() << "fgets failed";
+			if (!fgets(sbuf, sizeof(sbuf), file)) throw Common::Exception() << "fgets failed";
 			char* tok = strtok (sbuf, " ");
 			int w = atoi(tok);
 			tok = strtok (NULL, " ");
 			int h = atoi(tok);
-			fgets(sbuf, sizeof(sbuf), file);
+			if (!fgets(sbuf, sizeof(sbuf), file)) throw Common::Exception() << "fgets failed";
 			//int maxVal = atoi(sbuf);
 
 			int size = w*h*3;
@@ -46,7 +46,7 @@ struct PPM_IO : public IO {
 
 			while (!feof(file)) {
 
-				fgets(sbuf, 128, file);
+				if (!fgets(sbuf, sizeof(sbuf), file)) throw Common::Exception() << "fgets failed";
 				tok = strtok (sbuf," ");
 				while (tok != NULL) {
 					if (atoi(tok) != 0 || tok[0] == '0') imgdata[i++] = (unsigned char)atoi(tok);
