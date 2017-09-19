@@ -2,7 +2,7 @@
 
 #include "Common/Singleton.h"
 #include "Common/Exception.h"
-#include "Image/Image.h"
+#include "Image/IImage.h"
 #include <string>
 
 namespace Image {
@@ -44,5 +44,4 @@ public:
 	virtual void write(const std::string& filename, std::shared_ptr<const IImage> img) = 0;
 };
 
-};
-
+}

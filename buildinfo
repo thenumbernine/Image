@@ -39,10 +39,7 @@ if Image_supports.png then
 		libs:insert'png'
 		--dynamicLibs:insert'/usr/lib/x86_64-linux-gnu/libpng.so'
 	elseif platform == 'msvc' then
-		dynamicLibs:insert(cwd..'/../libpng1625/libpng.lib')
-		if not including then
-			include:insert(cwd..'/../libpng1625')
-		end
+		dynamicLibs:insert(home..[[\lib\libpng.dll.lib]])
 	end
 end
 if Image_supports.tiff then

@@ -18,8 +18,4 @@ struct JPEG_IO : public IO {
 #endif
 };
 
-extern Common::Singleton<JPEG_IO> jpegIO;
-
-};
-
-
+}

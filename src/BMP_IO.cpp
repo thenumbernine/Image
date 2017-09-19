@@ -150,7 +150,5 @@ void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 	}
 }
 
-Common::Singleton<BMP_IO> bmpIO;
-
-};
+}
 #endif //Image_supports_bmp

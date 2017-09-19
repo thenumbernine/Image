@@ -1,5 +1,5 @@
 #include "Image/IO.h"
-#include "Image/System.h"
+#include "Image/Image.h"
 
 namespace Image {
 
@@ -11,4 +11,4 @@ IO::IO() {
 
 IO *IO::getNext() { return next; }
 
-};
+}

@@ -4,6 +4,11 @@
 
 namespace Image {
 
+System::System()
+ : baseIO(NULL)
+{
+}
+
 std::shared_ptr<IImage> System::read(const std::string& filename) {
 	std::string ext = Common::File::getExtension(filename);
 
@@ -33,7 +38,4 @@ void System::write(const std::string& filename, std::shared_ptr<const IImage> im
 	}
 }
 
-Common::Singleton<System> system;
-
-};
-
+}

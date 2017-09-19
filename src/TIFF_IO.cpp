@@ -66,7 +66,5 @@ void TIFF_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 	throw Common::Exception() << "not implemented yet";
 }
 
-Common::Singleton<TIFF_IO> tiffIO;
-
-};
+}
 #endif	//Image_supports_tiff

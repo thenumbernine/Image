@@ -153,7 +153,5 @@ void FITS_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 	throw Common::Exception() << "failed to find RTTI for image";
 }
 
-Common::Singleton<FITS_IO> fitsIO;
-
-};
+}
 #endif	//Image_supports_fits

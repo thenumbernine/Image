@@ -12,8 +12,4 @@ struct TGA_IO : public IO {
 	virtual void write(const std::string& filename, std::shared_ptr<const IImage> img);
 };
 
-extern Common::Singleton<TGA_IO> tgaIO;
-
-};
-
-
+}

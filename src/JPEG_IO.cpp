@@ -248,7 +248,5 @@ std::shared_ptr<IImage> JPEG_IO::readFromMemory(const char *buffer, size_t size)
 
 #endif
 
-Common::Singleton<JPEG_IO> jpegIO;
-
-};
+}
 #endif	//Image_supports_jpeg

@@ -178,7 +178,5 @@ void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 	}
 }
 
-Common::Singleton<PNG_IO> pngIO;
-
-};
+}
 #endif	//Image_supports_png

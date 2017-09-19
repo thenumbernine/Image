@@ -58,8 +58,4 @@ public:
 	virtual void writeType(const std::string& filename, std::shared_ptr<const IImage> img, int imgType, int bitPixType, int dim);
 };
 
-extern Common::Singleton<FITS_IO> fitsIO;
-
-};
-
-
+}

@@ -126,7 +126,5 @@ void TGA_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 	throw Common::Exception() << "not implemented yet";
 }
 
-Common::Singleton<TGA_IO> tgaIO;
-
-};
+}
 #endif	//Image_supports_tga
