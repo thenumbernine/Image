@@ -10,18 +10,18 @@ extern "C" {
 namespace Image {
 
 template<typename Type> struct fitsType;
-template<> struct fitsType<char> { enum { value = TBYTE }; };
-template<> struct fitsType<short> { enum { value = TSHORT}; };
-template<> struct fitsType<int> { enum { value = TLONG}; };
-template<> struct fitsType<float> { enum { value = TFLOAT}; };
-template<> struct fitsType<double> { enum { value = TDOUBLE}; };
+template<> struct fitsType<char> { static constexpr auto value = TBYTE; };
+template<> struct fitsType<short> { static constexpr auto value = TSHORT; };
+template<> struct fitsType<int> { static constexpr auto value = TLONG; };
+template<> struct fitsType<float> { static constexpr auto value = TFLOAT; };
+template<> struct fitsType<double> { static constexpr auto value = TDOUBLE; };
 
 template<typename Type> struct fitsImage;
-template<> struct fitsImage<char> { enum { value = BYTE_IMG }; };
-template<> struct fitsImage<short> { enum { value = SHORT_IMG }; };
-template<> struct fitsImage<int> { enum { value = LONG_IMG }; };
-template<> struct fitsImage<float> { enum { value = FLOAT_IMG }; };
-template<> struct fitsImage<double> { enum { value = DOUBLE_IMG }; };
+template<> struct fitsImage<char> { static constexpr auto value = BYTE_IMG; };
+template<> struct fitsImage<short> { static constexpr auto value = SHORT_IMG; };
+template<> struct fitsImage<int> { static constexpr auto value = LONG_IMG; };
+template<> struct fitsImage<float> { static constexpr auto value = FLOAT_IMG; };
+template<> struct fitsImage<double> { static constexpr auto value = DOUBLE_IMG; };
 
 struct FITS_IO : public IO {
 	virtual ~FITS_IO();

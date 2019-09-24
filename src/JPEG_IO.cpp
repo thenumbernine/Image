@@ -31,7 +31,7 @@ struct my_error_mgr {
 	jmp_buf setjmp_buffer;	/* for return to caller */
 };
 
-typedef struct my_error_mgr * my_error_ptr;
+using my_error_ptr = struct my_error_mgr *;
 
 /*
  * Here's the routine that will replace the standard error_exit method:
@@ -138,7 +138,7 @@ std::shared_ptr<IImage> JPEG_IO::readFromMemory(const char *buffer, size_t size)
 				JOCTET * buffer;		/* start of buffer */
 				boolean start_of_file;	/* have we gotten any data yet? */
 			} my_source_mgr;
-			typedef my_source_mgr * my_src_ptr;
+			using my_src_ptr = my_source_mgr *;
 			
 #define INPUT_BUF_SIZE 4096
 

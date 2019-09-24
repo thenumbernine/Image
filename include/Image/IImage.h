@@ -23,11 +23,11 @@ struct IImage {
 
 template<typename Type_ = char>
 struct ImageType : public IImage {
-	typedef Type_ Type;
+	using Type = Type_;
 protected:
 	::Tensor::Vector<int,4> size;	//channels, width, height, planes
 
-	typedef Tensor::Grid<Type, 4> Grid;
+	using Grid = Tensor::Grid<Type, 4>;
 	std::shared_ptr<Grid> grid;
 
 public:
@@ -64,7 +64,7 @@ public:
 	const Type &operator()(int i, int j, int ch = 0, int pl = 0) const { return (*grid)(::Tensor::Vector<int,4>(ch,i,j,pl)); }
 };
 
-typedef struct ImageType<> Image;
+using Image = struct ImageType<>;
 
 };
 
