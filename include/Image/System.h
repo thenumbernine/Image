@@ -2,7 +2,6 @@
 
 #include "Image/IO.h"
 #include "Image/IImage.h"
-#include "Common/Singleton.h"
 
 namespace Image {
 

@@ -62,8 +62,5 @@ int main() {
 		Image::system->write("test." + ext, image);
 	}
 
-
-
 	return 0;
 }
-
