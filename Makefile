@@ -6,23 +6,23 @@ include ../Tensor/Include.mk
 include Config.mk
 
 ifdef IMAGE_SUPPORT_BMP
-MACROS+=Image_supports_bmp
+MACROS+=IMAGE_SUPPORTS_BMP
 endif
 ifdef IMAGE_SUPPORT_FITS
-MACROS+=Image_supports_fits
+MACROS+=IMAGE_SUPPORTS_FITS
 endif
 ifdef IMAGE_SUPPORT_JPEG
-MACROS+=Image_supports_jpeg
+MACROS+=IMAGE_SUPPORTS_JPEG
 endif
 ifdef IMAGE_SUPPORT_PNG
-MACROS+=Image_supports_png
+MACROS+=IMAGE_SUPPORTS_PNG
 endif
 ifdef IMAGE_SUPPORT_PPM
-MACROS+=Image_supports_ppm
+MACROS+=IMAGE_SUPPORTS_PPM
 endif
 ifdef IMAGE_SUPPORT_TGA
-MACROS+=Image_supports_tga
+MACROS+=IMAGE_SUPPORTS_TGA
 endif
 ifdef IMAGE_SUPPORT_TIFF
-MACROS+=Image_supports_tiff
+MACROS+=IMAGE_SUPPORTS_TIFF
 endif

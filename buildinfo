@@ -16,7 +16,7 @@ Image_supports = {
 }
 for format,info in pairs(Image_supports) do
 	if info.supports then
-		macros:insert('Image_supports_'..format)
+		macros:insert('IMAGE_SUPPORTS_'..format:upper())
 	end
 end
 

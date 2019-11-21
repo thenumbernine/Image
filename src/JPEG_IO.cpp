@@ -1,4 +1,4 @@
-#if defined(Image_supports_jpeg)
+#if IMAGE_SUPPORTS_JPEG
 #include "Image/JPEG_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -7,14 +7,14 @@
 #include <stdlib.h>
 extern "C" {
 #include <jpeglib.h>
-#ifndef PLATFORM_msvc
+#if !PLATFORM_MSVC
 #include <jerror.h>
 #endif
 }
 #include <setjmp.h>
 #include <vector>
 
-#ifdef PLATFORM_msvc
+#if PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
@@ -101,7 +101,7 @@ void JPEG_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 	throw Common::Exception() << "not implemented yet";
 }
 
-#ifndef PLATFORM_msvc
+#if !PLATFORM_MSVC
 
 //if i really wanted i could abstract this to combine with the above code
 //but the above seems to use libjpeg stuff made just for file loading
@@ -246,7 +246,7 @@ std::shared_ptr<IImage> JPEG_IO::readFromMemory(const char *buffer, size_t size)
 	}
 }
 
-#endif
+#endif	//!PLATFORM_MSVC
 
 }
-#endif	//Image_supports_jpeg
+#endif	//IMAGE_SUPPORTS_JPEG

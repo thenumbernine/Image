@@ -1,9 +1,9 @@
-#if defined(Image_supports_bmp)
+#if IMAGE_SUPPORTS_BMP
 #include "Image/BMP_IO.h"
 #include <fstream>
 #include <vector>
 
-#ifdef PLATFORM_msvc
+#if PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
@@ -151,4 +151,4 @@ void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 }
 
 }
-#endif //Image_supports_bmp
+#endif //IMAGE_SUPPORTS_BMP

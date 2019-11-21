@@ -1,4 +1,4 @@
-#if defined(Image_supports_tga)
+#if IMAGE_SUPPORTS_TGA
 #include "Image/TGA_IO.h"
 #include "Common/Exception.h"
 #include <fstream>
@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef PLATFORM_msvc
+#if PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
@@ -127,4 +127,4 @@ void TGA_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 }
 
 }
-#endif	//Image_supports_tga
+#endif	//IMAGE_SUPPORTS_TGA

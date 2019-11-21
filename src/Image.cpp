@@ -5,32 +5,32 @@ namespace Image {
 
 Common::Singleton<System> system;
 
-#if defined(Image_supports_bmp)
+#if IMAGE_SUPPORTS_BMP
 Common::Singleton<BMP_IO> bmpIO;
-#endif	//Image_supports_bmp
+#endif	//IMAGE_SUPPORTS_BMP
 
-#if defined(Image_supports_fits)
+#if IMAGE_SUPPORTS_FITS
 Common::Singleton<FITS_IO> fitsIO;
-#endif	//Image_supports_fits
+#endif	//IMAGE_SUPPORTS_FITS
 
-#if defined(Image_supports_jpeg)
+#if IMAGE_SUPPORTS_JPEG
 Common::Singleton<JPEG_IO> jpegIO;
-#endif	//Image_supports_jpeg
+#endif	//IMAGE_SUPPORTS_JPEG
 
-#if defined(Image_supports_png)
+#if IMAGE_SUPPORTS_PNG
 Common::Singleton<PNG_IO> pngIO;
-#endif	//Image_supports_png
+#endif	//IMAGE_SUPPORTS_PNG
 
-#if defined(Image_supports_ppm)
+#if IMAGE_SUPPORTS_PPM
 Common::Singleton<PPM_IO> ppmIO;
-#endif	//Image_supports_ppm
+#endif	//IMAGE_SUPPORTS_PPM
 
-#if defined(Image_supports_tga)
+#if IMAGE_SUPPORTS_TGA
 Common::Singleton<TGA_IO> tgaIO;
-#endif	//Image_supports_tga
+#endif	//IMAGE_SUPPORTS_TGA
 
-#if defined(Image_supports_tiff)
+#if IMAGE_SUPPORTS_TIFF
 Common::Singleton<TIFF_IO> tiffIO;
-#endif	//Image_supports_tiff
+#endif	//IMAGE_SUPPORTS_TIFF
 
 }

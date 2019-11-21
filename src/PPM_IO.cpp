@@ -1,4 +1,4 @@
-#if defined(Image_supports_ppm)
+#if IMAGE_SUPPORTS_PPM
 #include "Image/PPM_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <vector>
 
-#ifdef PLATFORM_msvc
+#if PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
@@ -71,4 +71,4 @@ void PPM_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 }
 
 }
-#endif	//Image_supports_ppm
+#endif	//IMAGE_SUPPORTS_PPM

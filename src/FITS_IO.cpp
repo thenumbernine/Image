@@ -1,4 +1,4 @@
-#if defined(Image_supports_fits)
+#if IMAGE_SUPPORTS_FITS
 #include "Image/FITS_IO.h"
 #include "Common/Exception.h"
 #include "Common/File.h"
@@ -8,7 +8,7 @@
 // http://www.mitchr.me/SS/exampleCode/cfitsio/fits2tga.c.html
 // http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node40.html#ffgidt
 
-#ifdef PLATFORM_msvc
+#if PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
@@ -154,4 +154,4 @@ void FITS_IO::write(const std::string& filename, std::shared_ptr<const IImage> i
 }
 
 }
-#endif	//Image_supports_fits
+#endif	//IMAGE_SUPPORTS_FITS

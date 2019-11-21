@@ -2,64 +2,64 @@
 
 #include "Image/System.h"
 
-#if defined(Image_supports_bmp)
+#if IMAGE_SUPPORTS_BMP
 #include "Image/BMP_IO.h"
-#endif	//Image_supports_bmp
+#endif	//IMAGE_SUPPORTS_BMP
 
-#if defined(Image_supports_fits)
+#if IMAGE_SUPPORTS_FITS
 #include "Image/FITS_IO.h"
-#endif	//Image_supports_fits
+#endif	//IMAGE_SUPPORTS_FITS
 
-#if defined(Image_supports_jpeg)
+#if IMAGE_SUPPORTS_JPEG
 #include "Image/JPEG_IO.h"
-#endif	//Image_supports_jpeg
+#endif	//IMAGE_SUPPORTS_JPEG
 
-#if defined(Image_supports_png)
+#if IMAGE_SUPPORTS_PNG
 #include "Image/PNG_IO.h"
-#endif	//Image_supports_png
+#endif	//IMAGE_SUPPORTS_PNG
 
-#if defined(Image_supports_ppm)
+#if IMAGE_SUPPORTS_PPM
 #include "Image/PPM_IO.h"
-#endif	//Image_supports_ppm
+#endif	//IMAGE_SUPPORTS_PPM
 
-#if defined(Image_supports_tga)
+#if IMAGE_SUPPORTS_TGA
 #include "Image/TGA_IO.h"
-#endif	//Image_supports_tga
+#endif	//IMAGE_SUPPORTS_TGA
 
-#if defined(Image_supports_tiff)
+#if IMAGE_SUPPORTS_TIFF
 #include "Image/TIFF_IO.h"
-#endif	//Image_supports_tiff
+#endif	//IMAGE_SUPPORTS_TIFF
 
 namespace Image {
 
 extern Common::Singleton<System> system;
 
-#if defined(Image_supports_bmp)
+#if IMAGE_SUPPORTS_BMP
 extern Common::Singleton<BMP_IO> bmpIO;
-#endif	//Image_supports_bmp
+#endif	//IMAGE_SUPPORTS_BMP
 
-#if defined(Image_supports_fits)
+#if IMAGE_SUPPORTS_FITS
 extern Common::Singleton<FITS_IO> fitsIO;
-#endif	//Image_supports_fits
+#endif	//IMAGE_SUPPORTS_FITS
 
-#if defined(Image_supports_jpeg)
+#if IMAGE_SUPPORTS_JPEG
 extern Common::Singleton<JPEG_IO> jpegIO;
-#endif	//Image_supports_jpeg
+#endif	//IMAGE_SUPPORTS_JPEG
 
-#if defined(Image_supports_png)
+#if IMAGE_SUPPORTS_PNG
 extern Common::Singleton<PNG_IO> pngIO;
-#endif	//Image_supports_png
+#endif	//IMAGE_SUPPORTS_PNG
 
-#if defined(Image_supports_ppm)
+#if IMAGE_SUPPORTS_PPM
 extern Common::Singleton<PPM_IO> ppmIO;
-#endif	//Image_supports_ppm
+#endif	//IMAGE_SUPPORTS_PPM
 
-#if defined(Image_supports_tga)
+#if IMAGE_SUPPORTS_TGA
 extern Common::Singleton<TGA_IO> tgaIO;
-#endif	//Image_supports_tga
+#endif	//IMAGE_SUPPORTS_TGA
 
-#if defined(Image_supports_tiff)
+#if IMAGE_SUPPORTS_TIFF
 extern Common::Singleton<TIFF_IO> tiffIO;
-#endif	//Image_supports_tiff
+#endif	//IMAGE_SUPPORTS_TIFF
 
 }

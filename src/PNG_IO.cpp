@@ -1,4 +1,4 @@
-#if defined(Image_supports_png)
+#if IMAGE_SUPPORTS_PNG
 #include "Image/PNG_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -7,7 +7,7 @@
 #include <png.h>
 #include <vector>
 
-#ifdef PLATFORM_msvc
+#if PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
@@ -179,4 +179,4 @@ void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 }
 
 }
-#endif	//Image_supports_png
+#endif	//IMAGE_SUPPORTS_PNG
