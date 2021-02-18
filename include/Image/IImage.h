@@ -64,7 +64,7 @@ public:
 	const Type &operator()(int i, int j, int ch = 0, int pl = 0) const { return (*grid)(::Tensor::Vector<int,4>(ch,i,j,pl)); }
 };
 
-using Image = struct ImageType<>;
+using Image = ImageType<>;
 
 };
 
