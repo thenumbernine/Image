@@ -3,6 +3,7 @@ distType='lib'
 depends:append{'../Common', '../Tensor'}
 
 -- TODO remember these for the depend() environment
+-- TODO use pkg-config to determine what is available
 
 local not_msvc_or_mingw = platform ~= 'msvc' and platform ~= 'mingw'
 Image_supports = {
@@ -13,6 +14,7 @@ Image_supports = {
 	ppm = {supports=true},
 	tga = {supports=true},
 	tiff = {supports=not_msvc_or_mingw},
+	gif = {supports=true},
 }
 for format,info in pairs(Image_supports) do
 	if info.supports then
@@ -46,5 +48,11 @@ end
 if Image_supports.tiff then
 	if platform == 'linux' then
 		env:addPackages'libtiff-4'
+	end
+end
+if Image_supports.gif then
+	if platform == 'linux' then
+		-- libgif has no pkg-config?
+		libs:insert'gif'
 	end
 end
