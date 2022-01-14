@@ -67,4 +67,3 @@ public:
 using Image = ImageType<>;
 
 };
-

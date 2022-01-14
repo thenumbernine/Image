@@ -11,14 +11,16 @@ namespace Image {
  * Abstract image loading interface.  create and register as you go.
  * Intertwined within it - through static methods - is access to the loader system
  */
-class IO {
+struct IO {
 	friend class Common::Singleton<IO>;	//so only the singleton can instanciate this
 	friend class System;
 	
 	//the image loader chain:
-	IO *next;
+	IO *next = {};
 
 	IO(const char &) { throw Common::Exception() << "no copy constructors for singletons!"; }
+
+	virtual ~IO() {}
 
 protected:
 	//attach yerself to the chain!
