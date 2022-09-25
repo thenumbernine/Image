@@ -28,9 +28,9 @@ std::shared_ptr<IImage> TIFF_IO::read(const std::string& filename) {
 		if (!tiff) throw Common::Exception() << " couldn't open file " << filename;
 		Common::Finally tiffFinally([&](){ TIFFClose(tiff); });
 
-		uint32 width = 0;
-		uint32 height = 0;
-		uint32 bytespp = 0;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t bytespp = 0;
 		TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
 		TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
 		TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &bytespp);
@@ -39,7 +39,7 @@ std::shared_ptr<IImage> TIFF_IO::read(const std::string& filename) {
 		//from there we can decide whether we need the alpha component
 		std::vector<unsigned char> imgdata(height * width * 4);
 		
-		if (!TIFFReadRGBAImageOriented(tiff, width, height, (uint32*)&imgdata[0], ORIENTATION_TOPLEFT, 0)) {
+		if (!TIFFReadRGBAImageOriented(tiff, width, height, (uint32_t*)&imgdata[0], ORIENTATION_TOPLEFT, 0)) {
 			throw Common::Exception() << " failed to read the image into a RGBA format";
 		}
 
@@ -56,7 +56,7 @@ std::shared_ptr<IImage> TIFF_IO::read(const std::string& filename) {
 			}
 		}
 		//img's existence signifies that we've made it
-		return std::make_shared<Image>(Tensor::Vector<int,2>(width, height), &imgdata[0], bytespp);
+		return std::make_shared<Image>(Tensor::int2(width, height), &imgdata[0], bytespp);
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "TIFF_IO::read(" << filename << ") error: " << t.what();
 	}	

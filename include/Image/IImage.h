@@ -12,7 +12,7 @@ namespace Image {
 //image interface
 struct IImage {
 	virtual ~IImage() {};
-	virtual ::Tensor::Vector<int,2> getSize() const = 0;
+	virtual ::Tensor::int2 getSize() const = 0;
 	virtual int getChannels() const = 0;
 	virtual int getPlanes() const = 0;
 	virtual int getBitsPerPixel() const { return getChannels() << 3; }
@@ -25,13 +25,13 @@ template<typename Type_ = char>
 struct ImageType : public IImage {
 	using Type = Type_;
 protected:
-	::Tensor::Vector<int,4> size;	//channels, width, height, planes
+	::Tensor::int4 size;	//channels, width, height, planes
 
 	using Grid = Tensor::Grid<Type, 4>;
 	std::shared_ptr<Grid> grid;
 
 public:
-	ImageType(const ::Tensor::Vector<int,2> size_, void *data = NULL, int channels = 3, int planes = 1)
+	ImageType(const ::Tensor::int2 size_, void *data = {}, int channels = 3, int planes = 1)
 	: size(channels, size_(0), size_(1), planes)
 	{
 		grid = std::make_shared<Grid>(size);
@@ -43,7 +43,7 @@ public:
 
 	virtual ~ImageType() {}
 
-	virtual ::Tensor::Vector<int,2> getSize() const { return ::Tensor::Vector<int,2>(size(1), size(2)); }
+	virtual ::Tensor::int2 getSize() const { return ::Tensor::int2(size(1), size(2)); }
 	virtual int getChannels() const { return size(0); }
 	virtual int getPlanes() const { return size(3); }
 	virtual int getBitsPerPixel() const { return getChannels() * sizeof(Type) << 3; }
@@ -60,8 +60,8 @@ public:
 	//it'd be nice to return a vector with size the # of channels
 	// but channels is not a compile time variable, so you have to pick out your elements individually.
 	// should it become one?
-	Type &operator()(int i, int j, int ch = 0, int pl = 0) { return (*grid)(::Tensor::Vector<int,4>(ch,i,j,pl)); }
-	const Type &operator()(int i, int j, int ch = 0, int pl = 0) const { return (*grid)(::Tensor::Vector<int,4>(ch,i,j,pl)); }
+	Type &operator()(int i, int j, int ch = 0, int pl = 0) { return (*grid)(::Tensor::int4(ch,i,j,pl)); }
+	const Type &operator()(int i, int j, int ch = 0, int pl = 0) const { return (*grid)(::Tensor::int4(ch,i,j,pl)); }
 };
 
 using Image = ImageType<>;

@@ -33,12 +33,12 @@ I'll switch to something else later
 
 #include <lua.hpp>
 #include "Common/Macros.h"
-#include "Image/System.h"
+#include "Image/Image.h"
 #include "Tensor/Vector.h"
 
 static int imgref = LUA_REFNIL;
 
-unsigned char* getImageDataOffset(Image::IImage* image, Tensor::Vector<int,2> offset) {
+unsigned char* getImageDataOffset(Image::IImage* image, Tensor::int2 offset) {
 	return (unsigned char *)image->getData() + image->getChannels() * (offset(0) + image->getSize()(0) * offset(1));
 }
 
@@ -82,7 +82,7 @@ static int binding_new(lua_State *L) {
 	*ptr = new std::shared_ptr<Image::IImage>();	//2) allocate in the STL gc system
 	lua_setfield(L, -2, "ptr");
 	
-	**ptr = std::make_shared<Image::Image>(Tensor::Vector<int,2>(width, height), nullptr, channels << 3);
+	**ptr = std::make_shared<Image::Image>(Tensor::int2(width, height), nullptr, channels << 3);
 
 	return 1;
 }
@@ -147,12 +147,12 @@ static int binding_size(lua_State *L) {
 	std::shared_ptr<Image::IImage>** ptr = (std::shared_ptr<Image::IImage>**)getParam<void*>(L, 1, "ptr");
 	if (!*ptr) luaL_error(L, "expected ptr to be non-null");
 	
-	Tensor::Vector<int,2> oldSize = (**ptr)->getSize();
+	Tensor::int2 oldSize = (**ptr)->getSize();
 	int oldChannels = (**ptr)->getBitsPerPixel() >> 3;	//TODO - we're assuming 8 bits per channel!
 
 #if 0		//not yet
 	if (argc >= 3) {
-		Tensor::Vector<int,2> newSize;
+		Tensor::int2 newSize;
 		newSize(0) = lua_tonumber(L, 2);
 		newSize(1) = lua_tonumber(L, 3);
 		(**ptr)->resize(newSize);
@@ -181,18 +181,18 @@ static int binding_resample(lua_State *L) {
 	if ((**srcImg)->getBitsPerPixel() & 7) luaL_error(L, "can only resample images whose bits-per-pixel is a factor of 8");
 	int channels = (**srcImg)->getBitsPerPixel() >> 3;
 	
-	Tensor::Vector<int,2> newSize;
+	Tensor::int2 newSize;
 	newSize(0) = lua_tonumber(L, 2);
 	newSize(1) = lua_tonumber(L, 3);
 
 	bool resampleLinear = false;
-	bool resampleCubic = false;
+	//bool resampleCubic = false;	//TODO
 	if (argc >= 4) {
 		const char *samplingStr = lua_tostring(L, 4);
 		if (!strcasecmp(samplingStr, "linear")) {
 			resampleLinear = true;
-		} else if (!strcasecmp(samplingStr, "cubic")) {
-			resampleCubic = true;
+		//} else if (!strcasecmp(samplingStr, "cubic")) {
+		//	resampleCubic = true;
 		}
 	}
 	
@@ -217,10 +217,10 @@ static int binding_resample(lua_State *L) {
 				unsigned char *srcp[2][2];
 				for (int di = 0; di < 2; di++) {
 					for (int dj = 0; dj < 2; dj++) {
-						srcp[di][dj] = getImageDataOffset((**srcImg).get(), Tensor::Vector<int,2>( (srci+di)%(**srcImg)->getSize()(0) , (srcj+dj)%(**srcImg)->getSize()(1) ));
+						srcp[di][dj] = getImageDataOffset((**srcImg).get(), Tensor::int2( (srci+di)%(**srcImg)->getSize()(0) , (srcj+dj)%(**srcImg)->getSize()(1) ));
 					}
 				}
-				unsigned char *dstp = getImageDataOffset((**dstImg).get(), Tensor::Vector<int,2>(dsti, dstj));
+				unsigned char *dstp = getImageDataOffset((**dstImg).get(), Tensor::int2(dsti, dstj));
 				for (int k = 0; k < channels; k++) {
 					dstp[k] = (unsigned char)(srcp[0][0][k] * (1.f - srcifrac) * (1.f - srcjfrac)
 						+ srcp[1][0][k] * srcifrac * (1.f - srcjfrac)
@@ -237,8 +237,8 @@ static int binding_resample(lua_State *L) {
 				float srcifloat = (float)dsti / (float)newSize(0) * (float)(**srcImg)->getSize()(0);
 				int srci = (int)floor(srcifloat);
 				
-				unsigned char *dstp = getImageDataOffset((**dstImg).get(), Tensor::Vector<int,2>(dsti,dstj));
-				unsigned char *srcp = getImageDataOffset((**srcImg).get(), Tensor::Vector<int,2>(srci,srcj));
+				unsigned char *dstp = getImageDataOffset((**dstImg).get(), Tensor::int2(dsti,dstj));
+				unsigned char *srcp = getImageDataOffset((**srcImg).get(), Tensor::int2(srci,srcj));
 				for (int k = 0; k < channels; k++) {
 					dstp[k] = srcp[k];
 				}
@@ -341,13 +341,13 @@ static int binding___call(lua_State *L) {
 
 	if (argc < 3) luaL_error(L, "expected img(x,y, ...)");
 	
-	int channels = (**ptr)->getBitsPerPixel() >> 3;	//TODO - remove assumption of 8 bits per channel
+	size_t channels = (**ptr)->getBitsPerPixel() >> 3;	//TODO - remove assumption of 8 bits per channel
 
 	//TODO ugly
 	unsigned char oldPixel[10];
 	assert(sizeof(oldPixel) >= channels);
 	
-	Tensor::Vector<int,2> tc;
+	Tensor::int2 tc;
 	tc(0) = lua_tonumber(L, 2);
 	tc(1) = lua_tonumber(L, 3);
 	tc(0) %= (**ptr)->getSize()(0);
@@ -361,7 +361,7 @@ static int binding___call(lua_State *L) {
 	if (argc > 3) {
 		unsigned char newPixel[sizeof(oldPixel)];
 		int ch = argc - 3;
-		if (ch > sizeof(newPixel)) ch = sizeof(newPixel);
+		if (ch > (int)sizeof(newPixel)) ch = (int)sizeof(newPixel);
 		for (int i = 0; i < ch; i++) {
 			float v = lua_tonumber(L, i+4);
 			if (v < 0) v = 0;
@@ -371,7 +371,7 @@ static int binding___call(lua_State *L) {
 		memcpy(getImageDataOffset((**ptr).get(), tc), newPixel, channels);
 	}
 
-	for (int i = 0; i < channels; i++) {
+	for (size_t i = 0; i < channels; i++) {
 		lua_pushnumber(L, (float)oldPixel[i] / 255.f);
 	}
 	return channels;
@@ -412,7 +412,7 @@ __declspec(dllexport)
 #endif
 int luaopen_libImageLua(lua_State *L) {
 	lua_newtable(L);	//img
-	for (int i = 0; i < numberof(bindings); ++i) {
+	for (size_t i = 0; i < numberof(bindings); ++i) {
 		lua_pushcfunction(L, bindings[i].func);	//img func
 		lua_setfield(L, lua_gettop(L)-1, bindings[i].name);	//img, img[name] = func
 	}

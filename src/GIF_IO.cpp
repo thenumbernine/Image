@@ -73,7 +73,7 @@ std::shared_ptr<IImage> GIF_IO::read(const std::string& filename) {
 //				std::cout << ":" << ss.str() << std::endl;
 			}
 			
-			return std::make_shared<Image>(Tensor::Vector<int,2>(desc.Width, desc.Height), &imgdata[0], imgbpp);
+			return std::make_shared<Image>(Tensor::int2(desc.Width, desc.Height), &imgdata[0], imgbpp);
 //		}
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "GIF_IO::read(" << filename << ") error: " << t.what();

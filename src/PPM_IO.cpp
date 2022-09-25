@@ -60,7 +60,7 @@ std::shared_ptr<IImage> PPM_IO::read(const std::string& filename) {
 			if (i >= size) break;
 		}
 
-		return std::make_shared<Image>(Tensor::Vector<int,2>(w,h), &imgdata[0]);
+		return std::make_shared<Image>(Tensor::int2(w,h), &imgdata[0]);
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "PPM_IO::read(" << filename << ") error: " << t.what();
 	}

@@ -114,7 +114,7 @@ std::shared_ptr<IImage> TGA_IO::read(const std::string& filename) {
 		}
 	
 		if (bitsPerPixel & 7) throw Common::Exception() << "unsupported bits per pixel " << bitsPerPixel;
-		return std::make_shared<Image>(Tensor::Vector<int,2>(width, height), &imgdata[0], bitsPerPixel >> 3);
+		return std::make_shared<Image>(Tensor::int2(width, height), &imgdata[0], bitsPerPixel >> 3);
 	} catch (const std::exception &t) {
 		//finally
 		//all else

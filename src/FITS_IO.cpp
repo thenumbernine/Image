@@ -74,7 +74,7 @@ std::shared_ptr<IImage> FITS_IO::read(const std::string& filename) {
 	if (status) throw Common::Exception() << "ffgisz failed with " << status;
 	int width = sizes[0];
 	int height = sizes[1];
-	Tensor::Vector<int,2> size(width,height);
+	Tensor::int2 size(width,height);
 	int channels = sizes[2];
 	
 	int numPixels = width * height * channels;

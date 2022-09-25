@@ -91,7 +91,7 @@ std::shared_ptr<IImage> JPEG_IO::read(const std::string& filename) {
 
 		jpeg_finish_decompress(&cinfo);
 		
-		return std::make_shared<Image>(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
+		return std::make_shared<Image>(Tensor::int2(cinfo.output_width, cinfo.output_height), &imgdata[0]);
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "JPEG_IO::read(" << filename << ") error: " << t.what();
 	}
@@ -240,7 +240,7 @@ std::shared_ptr<IImage> JPEG_IO::readFromMemory(const char *buffer, size_t size)
 
 		jpeg_finish_decompress(&cinfo);
 		
-		return std::make_shared<Image>(Tensor::Vector<int,2>(cinfo.output_width, cinfo.output_height), &imgdata[0]);
+		return std::make_shared<Image>(Tensor::int2(cinfo.output_width, cinfo.output_height), &imgdata[0]);
 	} catch (const std::exception &t) {
 		throw Common::Exception() << "JPEG_IO::readFromMemory() error: " << t.what();
 	}

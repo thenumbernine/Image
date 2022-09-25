@@ -1,0 +1,3 @@
+distName='ImageLua'
+distType='lib'
+depends:append{'../../Common', '../../Tensor', '../../LuaCxx', '..'}

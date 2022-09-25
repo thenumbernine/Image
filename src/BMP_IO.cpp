@@ -99,7 +99,7 @@ std::shared_ptr<IImage> BMP_IO::read(const std::string& filename) {
 		
 		//do this last so img == null if anything goes wrong
 		return std::make_shared<Image>(
-			Tensor::Vector<int,2>(hdr.width, height),	//size
+			Tensor::int2(hdr.width, height),	//size
 			&imgdata[0],							//data
 			hdr.bitsPerPixel >> 3);				//channels
 	} catch (const std::exception &t) {

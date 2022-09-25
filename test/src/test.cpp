@@ -5,7 +5,7 @@
 #include <vector>
 
 int main() {
-	std::shared_ptr<Image::Image> image = std::make_shared<Image::Image>(Tensor::Vector<int,2>(256, 256));
+	std::shared_ptr<Image::Image> image = std::make_shared<Image::Image>(Tensor::int2(256, 256));
 	for (int y = 0; y < 256; ++y) {
 		for (int x = 0; x < 256; ++x) {
 			(*image)(x,y,0) = x;
@@ -14,7 +14,7 @@ int main() {
 		}
 	}
 
-	TEST_EQ(image->getSize(), (Tensor::Vector<int, 2>(256, 256)));
+	TEST_EQ(image->getSize(), (Tensor::int2(256, 256)));
 	TEST_EQ(image->getBitsPerPixel(), 24);
 
 	//read test
@@ -33,7 +33,7 @@ int main() {
 		std::string filename = "test." + ext;
 		std::cout << "testing read of " << filename << std::endl;
 		std::shared_ptr<Image::Image> check = std::dynamic_pointer_cast<Image::Image>(Image::system->read(filename));
-		TEST_EQ(check->getSize(), (Tensor::Vector<int, 2>(256, 256)));
+		TEST_EQ(check->getSize(), (Tensor::int2(256, 256)));
 		TEST_EQ(check->getBitsPerPixel(), 24);
 		int totalError = 0;
 		for (int y = 0; y < 256; ++y) {
