@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Tensor/Grid.h"
-#include "Tensor/Vector.h"
 #include "Common/Meta.h"
 #include <string.h>
 #include <memory>
@@ -32,7 +31,7 @@ protected:
 
 public:
 	ImageType(const ::Tensor::int2 size_, void *data = {}, int channels = 3, int planes = 1)
-	: size(channels, size_(0), size_(1), planes)
+	: size(channels, size_.x, size_.y, planes)
 	{
 		grid = std::make_shared<Grid>(size);
 		//ugly
@@ -43,9 +42,9 @@ public:
 
 	virtual ~ImageType() {}
 
-	virtual ::Tensor::int2 getSize() const { return ::Tensor::int2(size(1), size(2)); }
-	virtual int getChannels() const { return size(0); }
-	virtual int getPlanes() const { return size(3); }
+	virtual ::Tensor::int2 getSize() const { return size.subset<2,1>(); }
+	virtual int getChannels() const { return size.x; }
+	virtual int getPlanes() const { return size.w; }
 	virtual int getBitsPerPixel() const { return getChannels() * sizeof(Type) << 3; }
 	
 	virtual char *getData() { return (char*)grid->v; }

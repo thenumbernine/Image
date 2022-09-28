@@ -120,7 +120,7 @@ void FITS_IO::writeType(const std::string& filename, std::shared_ptr<const IImag
 	ffinit(&fitsFilePtr, filename.c_str(), &status);
 	if (status) throw Common::Exception() << "ffinit failed with " << status;
 
-	long sizes[3] = {img->getSize()(0), img->getSize()(1), dim};
+	long sizes[3] = {img->getSize().x, img->getSize().y, dim};
 	
 	status = ffphps(fitsFilePtr, bitPixType, 3, sizes, &status);
 	if (status) throw Common::Exception() << "ffphps failed with " << status;
@@ -130,7 +130,7 @@ void FITS_IO::writeType(const std::string& filename, std::shared_ptr<const IImag
 		firstpix[i] = 1;
 	}
 	
-	int numPixels = img->getSize()(0) * img->getSize()(1) * dim;
+	int numPixels = img->getSize().x * img->getSize().y * dim;
 	
 	ffppx(fitsFilePtr, imgType, firstpix, numPixels, (void*)img->getData(), &status);
 	if (status) throw Common::Exception() << "ffppx failed with " << status;

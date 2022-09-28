@@ -35,9 +35,9 @@ static int read_chunk_callback(png_infop ptr,
 	  following: */
 	int n = 1;
 
-   return (-n); /* chunk had an error */
-   return (0); /* did not recognize */
-   return (n); /* success */
+   return -n; /* chunk had an error */
+   return 0; /* did not recognize */
+   return n; /* success */
 }
 #endif
 
@@ -150,8 +150,8 @@ void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 
 		if (img->getChannels() != 3 && img->getChannels() != 4) throw Common::Exception() << "only supports 24 or 32 bpp";
 
-		png_uint_32 width = img->getSize()(0);
-		png_uint_32 height = img->getSize()(1);
+		png_uint_32 width = img->getSize().x;
+		png_uint_32 height = img->getSize().y;
 		int bit_depth = 8;	//bits per channel, not bits per pixel
 		int color_type = img->getChannels() == 3 ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGBA;
 		png_set_IHDR(png_ptr, info_ptr, width, height, bit_depth, color_type, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
@@ -161,7 +161,7 @@ void PNG_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 		std::vector<png_bytep> row_pointers(height);
 		int bytesPerPixel = img->getChannels();
 		for (int y=0; y<(int)height; y++) {
-			row_pointers[y] = (png_byte*)(img->getData() + y * img->getSize()(0) * bytesPerPixel);
+			row_pointers[y] = (png_byte*)(img->getData() + y * img->getSize().x * bytesPerPixel);
 		}
 		
 		/* write bytes */

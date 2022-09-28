@@ -119,8 +119,8 @@ void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 		
 		bitmapHeader_t hdr;
 		memset(&hdr, 0, sizeof(hdr));
-		hdr.width = img->getSize()(0);
-		hdr.height = img->getSize()(1);
+		hdr.width = img->getSize().x;
+		hdr.height = img->getSize().y;
 		hdr.horzRes = hdr.width;
 		hdr.vertRes = hdr.height;
 		int pixelsWide = 3 * hdr.width;
@@ -136,9 +136,9 @@ void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 		
 		int bytesPerPixel = img->getChannels();
 		int dummy = 0;
-		for (int y = img->getSize()(1)-1; y >= 0; y--) {
-			const char *src = img->getData() + img->getSize()(0) * bytesPerPixel * y;
-			for (int x = 0; x < img->getSize()(0); x++, src += bytesPerPixel) {
+		for (int y = img->getSize().y-1; y >= 0; y--) {
+			const char *src = img->getData() + img->getSize().x * bytesPerPixel * y;
+			for (int x = 0; x < img->getSize().x; x++, src += bytesPerPixel) {
 				for (int ch = 2; ch >= 0; --ch) {
 					if (!file.put(src[ch])) throw Common::Exception() << "failed to write data";
 				}

@@ -39,7 +39,7 @@ I'll switch to something else later
 static int imgref = LUA_REFNIL;
 
 unsigned char* getImageDataOffset(Image::IImage* image, Tensor::int2 offset) {
-	return (unsigned char *)image->getData() + image->getChannels() * (offset(0) + image->getSize()(0) * offset(1));
+	return (unsigned char *)image->getData() + image->getChannels() * (offset.x + image->getSize().x * offset.y);
 }
 
 
@@ -153,14 +153,14 @@ static int binding_size(lua_State *L) {
 #if 0		//not yet
 	if (argc >= 3) {
 		Tensor::int2 newSize;
-		newSize(0) = lua_tonumber(L, 2);
-		newSize(1) = lua_tonumber(L, 3);
+		newSize.x = lua_tonumber(L, 2);
+		newSize.y = lua_tonumber(L, 3);
 		(**ptr)->resize(newSize);
 	}
 #endif
 	
-	lua_pushnumber(L, oldSize(0));
-	lua_pushnumber(L, oldSize(1));
+	lua_pushnumber(L, oldSize.x);
+	lua_pushnumber(L, oldSize.y);
 	lua_pushnumber(L, oldChannels);
 	return 3;
 }
@@ -182,8 +182,8 @@ static int binding_resample(lua_State *L) {
 	int channels = (**srcImg)->getBitsPerPixel() >> 3;
 	
 	Tensor::int2 newSize;
-	newSize(0) = lua_tonumber(L, 2);
-	newSize(1) = lua_tonumber(L, 3);
+	newSize.x = lua_tonumber(L, 2);
+	newSize.y = lua_tonumber(L, 3);
 
 	bool resampleLinear = false;
 	//bool resampleCubic = false;	//TODO
@@ -205,19 +205,19 @@ static int binding_resample(lua_State *L) {
 	**dstImg = std::make_shared<Image::Image>(newSize, nullptr, channels << 3);
 	
 	if (resampleLinear) {
-		for (int dstj = 0; dstj < newSize(1); dstj++) {
-			float srcjfloat = (float)dstj / (float)newSize(1) * (float)(**srcImg)->getSize()(1);
+		for (int dstj = 0; dstj < newSize.y; dstj++) {
+			float srcjfloat = (float)dstj / (float)newSize.y * (float)(**srcImg)->getSize().y;
 			int srcj = (int)floor(srcjfloat);
 			float srcjfrac = srcjfloat - (float)srcj;
-			for (int dsti = 0; dsti < newSize(0); dsti++) {
-				float srcifloat = (float)dsti / (float)newSize(0) * (float)(**srcImg)->getSize()(0);
+			for (int dsti = 0; dsti < newSize.x; dsti++) {
+				float srcifloat = (float)dsti / (float)newSize.x * (float)(**srcImg)->getSize().x;
 				int srci = (int)floor(srcifloat);
 				float srcifrac = srcifloat - (float)srci;
 				
 				unsigned char *srcp[2][2];
 				for (int di = 0; di < 2; di++) {
 					for (int dj = 0; dj < 2; dj++) {
-						srcp[di][dj] = getImageDataOffset((**srcImg).get(), Tensor::int2( (srci+di)%(**srcImg)->getSize()(0) , (srcj+dj)%(**srcImg)->getSize()(1) ));
+						srcp[di][dj] = getImageDataOffset((**srcImg).get(), Tensor::int2( (srci+di)%(**srcImg)->getSize().x , (srcj+dj)%(**srcImg)->getSize().y ));
 					}
 				}
 				unsigned char *dstp = getImageDataOffset((**dstImg).get(), Tensor::int2(dsti, dstj));
@@ -230,11 +230,11 @@ static int binding_resample(lua_State *L) {
 			}
 		}
 	} else {
-		for (int dstj = 0; dstj < newSize(1); dstj++) {
-			float srcjfloat = (float)dstj / (float)newSize(1) * (float)(**srcImg)->getSize()(1);
+		for (int dstj = 0; dstj < newSize.y; dstj++) {
+			float srcjfloat = (float)dstj / (float)newSize.y * (float)(**srcImg)->getSize().y;
 			int srcj = (int)floor(srcjfloat);
-			for (int dsti = 0; dsti < newSize(0); dsti++) {
-				float srcifloat = (float)dsti / (float)newSize(0) * (float)(**srcImg)->getSize()(0);
+			for (int dsti = 0; dsti < newSize.x; dsti++) {
+				float srcifloat = (float)dsti / (float)newSize.x * (float)(**srcImg)->getSize().x;
 				int srci = (int)floor(srcifloat);
 				
 				unsigned char *dstp = getImageDataOffset((**dstImg).get(), Tensor::int2(dsti,dstj));
@@ -264,10 +264,10 @@ static int imgIterFunc(lua_State *L) {
 	if (!*ptr) luaL_error(L, "expected ptr to be non-null");
 
 	x++;
-	if (x >= (**ptr)->getSize()(0)) {
+	if (x >= (**ptr)->getSize().x) {
 		x = 0;
 		y++;
-		if (y >= (**ptr)->getSize()(1)) {
+		if (y >= (**ptr)->getSize().y) {
 			y = 0;
 			lua_pushinteger(L, 0);
 			lua_setfield(L, 1, "y");
@@ -348,13 +348,13 @@ static int binding___call(lua_State *L) {
 	assert(sizeof(oldPixel) >= channels);
 	
 	Tensor::int2 tc;
-	tc(0) = lua_tonumber(L, 2);
-	tc(1) = lua_tonumber(L, 3);
-	tc(0) %= (**ptr)->getSize()(0);
-	tc(1) %= (**ptr)->getSize()(1);
+	tc.x = lua_tonumber(L, 2);
+	tc.y = lua_tonumber(L, 3);
+	tc.x %= (**ptr)->getSize().x;
+	tc.y %= (**ptr)->getSize().y;
 	tc += (**ptr)->getSize(); 
-	tc(0) %= (**ptr)->getSize()(0);
-	tc(1) %= (**ptr)->getSize()(1);
+	tc.x %= (**ptr)->getSize().x;
+	tc.y %= (**ptr)->getSize().y;
 
 	memcpy(oldPixel, getImageDataOffset((**ptr).get(), tc), channels);
 	
