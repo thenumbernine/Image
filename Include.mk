@@ -1,11 +1,7 @@
 IMAGE_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
-
 include $(IMAGE_PATH)Config.mk
-
 INCLUDE+=$(IMAGE_PATH)include
-
-# on linux, libImage.so must go before the other .so's 
-DYNAMIC_LIBS:=$(IMAGE_PATH)dist/$(PLATFORM)/$(BUILD)/libImage$(LIB_SUFFIX) $(DYNAMIC_LIBS)
+DEPEND_LIBS+=$(IMAGE_PATH)dist/$(PLATFORM)/$(BUILD)/$(LIB_PREFIX)Image$(LIB_SUFFIX)
 
 ifdef IMAGE_SUPPORTS_FITS
 DYNAMIC_LIBS_osx+=$(HOME)/lib/libcfitsio.5.3.41$(LIB_SUFFIX)
