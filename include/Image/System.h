@@ -11,17 +11,15 @@ namespace Image {
  */
 class System {
 public:
-	//the base of the image loader chain
-	//TODO - only allow this to be accessible by new image loader classes
-	IO *baseIO;
+	std::vector<IO*> ios;
 
 	System();
 
 	//access to loading an image from our chain:
-	std::shared_ptr<IImage> read(const std::string& filename);
+	std::shared_ptr<IImage> read(std::string const & filename);
 	
 	//save an image
-	void write(const std::string& filename, std::shared_ptr<const IImage> image);
+	void write(std::string const & filename, std::shared_ptr<IImage const> image);
 };
 
 }

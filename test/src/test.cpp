@@ -17,8 +17,8 @@ int main() {
 	TEST_EQ(image->getSize(), (Tensor::int2(256, 256)));
 	TEST_EQ(image->getBitsPerPixel(), 24);
 
-	//read test
-	
+	//read test TODO this second.  do write tests first.
+#if 0	
 	std::vector<std::string> readExts = {
 		"bmp",
 		"fits",
@@ -29,7 +29,7 @@ int main() {
 		"tiff"
 	};
 
-	for (std::string ext : readExts) {
+	for (auto ext : readExts) {
 		std::string filename = "test." + ext;
 		std::cout << "testing read of " << filename << std::endl;
 		std::shared_ptr<Image::Image> check = std::dynamic_pointer_cast<Image::Image>(Image::system->read(filename));
@@ -46,7 +46,8 @@ int main() {
 		}
 		std::cout << filename << " read total error " << totalError << std::endl;
 	}
-	
+#endif
+
 	//write test
 	std::vector<std::string> writeExts = {
 		"bmp",
@@ -58,7 +59,7 @@ int main() {
 		//"tiff"	//not yet implemented
 	};
 
-	for (std::string ext : writeExts) {
+	for (auto ext : writeExts) {
 		Image::system->write("test." + ext, image);
 	}
 

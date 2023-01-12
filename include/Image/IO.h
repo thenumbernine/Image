@@ -14,21 +14,14 @@ namespace Image {
 struct IO {
 	friend class Common::Singleton<IO>;	//so only the singleton can instanciate this
 	friend class System;
-	
-	//the image loader chain:
-	IO *next = {};
 
+protected:
+	// so singleton can make it
+	IO() {}
+public:
 	IO(const char &) { throw Common::Exception() << "no copy constructors for singletons!"; }
 
 	virtual ~IO() {}
-
-protected:
-	//attach yerself to the chain!
-	IO();
-	
-	IO *getNext();
-	
-public:
 
 	//returns whether or not we can load the file, based on matching extension
 	virtual bool supportsExtension(const std::string& extension) = 0;
