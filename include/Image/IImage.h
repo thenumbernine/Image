@@ -51,7 +51,7 @@ public:
 	virtual const char *getData() const { return (char*)grid->v; }
 	virtual Type *getDataType() { return grid->v; }
 	virtual const Type *getDataType() const { return grid->v; }
-	virtual size_t getDataSize() { return sizeof(Type) * size.volume(); }
+	virtual size_t getDataSize() { return sizeof(Type) * size.product(); }
 
 	virtual std::shared_ptr<Grid> getGrid() { return grid; }
 	virtual std::shared_ptr<const Grid> getGrid() const { return grid; }
