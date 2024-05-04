@@ -1,7 +1,3 @@
-#include "Image/System.h"
-#include "Common/File.h"
-#include "Common/Exception.h"
-
 #include "Image/BMP_IO.h"
 #include "Image/FITS_IO.h"
 #include "Image/GIF_IO.h"
@@ -10,6 +6,13 @@
 #include "Image/PPM_IO.h"
 #include "Image/TGA_IO.h"
 #include "Image/TIFF_IO.h"
+
+#include "Image/System.h"
+
+#include "Common/File.h"
+#include "Common/Exception.h"
+
+#include <filesystem>
 
 namespace Image {
 
@@ -73,7 +76,7 @@ System::System() {
 }
 
 std::shared_ptr<IImage> System::read(std::string const & filename) {
-	std::string ext = Common::File::getExtension(filename);
+	std::string ext = std::filesystem::path(filename).extension();
 
 	try {
 		for (auto const & io : ios) {
@@ -87,7 +90,7 @@ std::shared_ptr<IImage> System::read(std::string const & filename) {
 }
 
 void System::write(std::string const & filename, std::shared_ptr<IImage const> image) {
-	std::string ext = Common::File::getExtension(filename);
+	std::string ext = std::filesystem::path(filename).extension();
 
 	try {
 		for (auto const & io : ios) {
