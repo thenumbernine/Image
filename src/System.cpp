@@ -76,7 +76,7 @@ System::System() {
 }
 
 std::shared_ptr<IImage> System::read(std::string const & filename) {
-	std::string ext = std::filesystem::path(filename).extension();
+	std::string ext = std::filesystem::path(filename).extension().string().substr(1);
 
 	try {
 		for (auto const & io : ios) {
@@ -90,7 +90,7 @@ std::shared_ptr<IImage> System::read(std::string const & filename) {
 }
 
 void System::write(std::string const & filename, std::shared_ptr<IImage const> image) {
-	std::string ext = std::filesystem::path(filename).extension();
+	std::string ext = std::filesystem::path(filename).extension().string().substr(1);
 
 	try {
 		for (auto const & io : ios) {
