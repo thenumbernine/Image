@@ -23,26 +23,37 @@ for format,info in pairs(Image_supports) do
 end
 
 if Image_supports.fits then
-	if platform == 'linux' then
+	if platform == 'linux'
+	or platform == 'osx'
+	then
 		env:addPackages'cfitsio'
-	end
-	if platform == 'osx' then
-		dynamicLibs:insert(os.getenv'HOME'..'/lib/libcfitsio.5.3.41.dylib')
 	end
 end
 if Image_supports.jpeg then
-	if platform == 'linux' then
+	if platform == 'linux'
+	then
 		env:addPackages'libjpeg'
 	elseif platform == 'osx' then
-		dynamicLibs:insert(os.getenv'HOME'..'/lib/libjpeg.9.dylib')
+		--[[
+		local jpegdir = '/usr/local/opt/jpeg'
+		include:insert(jpegdir..'/include')
+		dynamicLibs:insert(jpegdir..'/lib/libjpeg.dylib')
+		--]]
+		-- [[
+		env:addPackages'/usr/local/Cellar/jpeg/9f/lib/pkgconfig/libjpeg.pc'
+		--]]
 	end
 end
 if Image_supports.png then
-	if platform == 'linux' then
+	if platform == 'linux'
+	or platform == 'osx'
+	then
 		env:addPackages'libpng'
+--[=[
 	elseif platform == 'msvc' then
 		include:insert(home..[[\Projects\other\libpng-1.6.37]])
 		dynamicLibs:insert(home..[[\bin\x64\png.lib]])
+--]=]
 	end
 end
 if Image_supports.tiff then
@@ -51,8 +62,10 @@ if Image_supports.tiff then
 	end
 end
 if Image_supports.gif then
-	if platform == 'linux' then
-		-- libgif has no pkg-config?
+	if platform == 'linux'
+	or platform == 'osx'
+	then
+		-- linux libgif has no pkg-config?
 		libs:insert'gif'
 	end
 end
