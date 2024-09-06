@@ -9,11 +9,11 @@ local not_msvc_or_mingw = platform ~= 'msvc' and platform ~= 'mingw'
 Image_supports = {
 	bmp = {supports=true},
 	fits = {supports=not_msvc_or_mingw},
-	jpeg = {supports=not_msvc_or_mingw},
+	jpeg = {supports=true},
 	png = {supports=true},
 	ppm = {supports=true},
 	tga = {supports=true},
-	tiff = {supports=not_msvc_or_mingw},
+	tiff = {supports=true},
 	gif = {supports=true},
 }
 for format,info in pairs(Image_supports) do
