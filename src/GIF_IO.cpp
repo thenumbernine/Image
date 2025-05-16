@@ -1,4 +1,6 @@
-#if IMAGE_SUPPORTS_GIF
+#include "Image/Config.h"
+
+#ifdef IMAGE_SUPPORTS_GIF
 #include "Image/GIF_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -8,7 +10,7 @@
 #include <unistd.h>	//close()
 #include <gif_lib.h>
 
-#if PLATFORM_MSVC
+#ifdef PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 

@@ -1,4 +1,6 @@
-#if IMAGE_SUPPORTS_PPM
+#include "Image/Config.h"
+
+#ifdef IMAGE_SUPPORTS_PPM
 #include "Image/PPM_IO.h"
 #include "Common/Exception.h"
 #include "Common/Finally.h"
@@ -7,7 +9,7 @@
 #include <stdlib.h>
 #include <vector>
 
-#if PLATFORM_MSVC
+#ifdef PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 

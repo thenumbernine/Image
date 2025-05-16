@@ -1,4 +1,6 @@
-#if IMAGE_SUPPORTS_FITS
+#include "Image/Config.h"
+
+#ifdef IMAGE_SUPPORTS_FITS
 #include "Image/FITS_IO.h"
 #include "Common/Exception.h"
 #include "Common/File.h"
@@ -8,7 +10,7 @@
 // http://www.mitchr.me/SS/exampleCode/cfitsio/fits2tga.c.html
 // http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node40.html#ffgidt
 
-#if PLATFORM_MSVC
+#ifdef PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 

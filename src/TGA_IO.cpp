@@ -1,4 +1,6 @@
-#if IMAGE_SUPPORTS_TGA
+#include "Image/Config.h"
+
+#ifdef IMAGE_SUPPORTS_TGA
 #include "Image/TGA_IO.h"
 #include "Common/Exception.h"
 #include <fstream>
@@ -6,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if PLATFORM_MSVC
+#ifdef PLATFORM_MSVC
 #define strcasecmp _stricmp
 #endif
 
