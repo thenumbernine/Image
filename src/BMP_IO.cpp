@@ -40,11 +40,11 @@ BMP_IO::~BMP_IO() {}
 	
 std::string BMP_IO::name() { return "BMP_IO"; }
 	
-bool BMP_IO::supportsExtension(const std::string& extension) {
+bool BMP_IO::supportsExtension(std::string const & extension) {
 	return !strcasecmp(extension.c_str(), "bmp");
 }
 	
-std::shared_ptr<IImage> BMP_IO::read(const std::string& filename) {
+std::shared_ptr<IImage> BMP_IO::read(std::string const & filename) {
 
 	//list out resources we have to free here:
 	try {
@@ -104,14 +104,14 @@ std::shared_ptr<IImage> BMP_IO::read(const std::string& filename) {
 			Tensor::int2(hdr.width, height),	//size
 			&imgdata[0],							//data
 			hdr.bitsPerPixel >> 3);				//channels
-	} catch (const std::exception &t) {
+	} catch (std::exception const & t) {
 		//finally code ...
 		//only for errors
 		throw Common::Exception() << "BMP_IO::read("<<filename<<") error: " << t.what();
 	}
 }
 	
-void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> img) {
+void BMP_IO::write(std::string const & filename, std::shared_ptr<IImage const> img) {
 	try {
 		if (img->getBitsPerPixel() < 24) throw Common::Exception() << "don't support writing for " << img->getBitsPerPixel() << " bits per pixel yet";
 
@@ -134,20 +134,20 @@ void BMP_IO::write(const std::string& filename, std::shared_ptr<const IImage> im
 		hdr.fileSize = hdr.imgOffset + hdr.imgSize;	//no palette data atm
 		hdr.planes = 1;
 		hdr.bitsPerPixel = 24;
-		if (!file.write((const char*)&hdr, sizeof(hdr))) throw Common::Exception() << "failed to write header";
+		if (!file.write((char const *)&hdr, sizeof(hdr))) throw Common::Exception() << "failed to write header";
 		
 		int bytesPerPixel = img->getChannels();
 		int dummy = 0;
 		for (int y = img->getSize().y-1; y >= 0; y--) {
-			const char *src = img->getData() + img->getSize().x * bytesPerPixel * y;
+			uint8_t const *src = img->getData() + img->getSize().x * bytesPerPixel * y;
 			for (int x = 0; x < img->getSize().x; x++, src += bytesPerPixel) {
 				for (int ch = 2; ch >= 0; --ch) {
 					if (!file.put(src[ch])) throw Common::Exception() << "failed to write data";
 				}
 			}
-			if (!file.write((const char *)&dummy, padding)) throw Common::Exception() << "failed to write padding";
+			if (!file.write((char const *)&dummy, padding)) throw Common::Exception() << "failed to write padding";
 		}
-	} catch (const std::exception &t) {
+	} catch (std::exception const & t) {
 		throw Common::Exception() << "BMP_IO::write("<<filename<<") error:" << t.what();
 	}
 }

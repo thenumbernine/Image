@@ -15,8 +15,8 @@ struct IImage {
 	virtual int getChannels() const = 0;
 	virtual int getPlanes() const = 0;
 	virtual int getBitsPerPixel() const { return getChannels() << 3; }
-	virtual char *getData() = 0;
-	virtual const char *getData() const = 0;
+	virtual uint8_t *getData() = 0;
+	virtual const uint8_t *getData() const = 0;
 	virtual size_t getDataSize() = 0;
 };
 
@@ -47,8 +47,8 @@ public:
 	virtual int getPlanes() const { return size.w; }
 	virtual int getBitsPerPixel() const { return getChannels() * sizeof(Type) << 3; }
 	
-	virtual char *getData() { return (char*)grid->v; }
-	virtual const char *getData() const { return (char*)grid->v; }
+	virtual uint8_t *getData() { return (uint8_t*)grid->v; }
+	virtual const uint8_t *getData() const { return (uint8_t*)grid->v; }
 	virtual Type *getDataType() { return grid->v; }
 	virtual const Type *getDataType() const { return grid->v; }
 	virtual size_t getDataSize() { return sizeof(Type) * size.product(); }
