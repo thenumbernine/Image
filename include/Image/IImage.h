@@ -20,7 +20,7 @@ struct IImage {
 	virtual size_t getDataSize() = 0;
 };
 
-template<typename Type_ = char>
+template<typename Type_ = uint8_t>
 struct ImageType : public IImage {
 	using Type = Type_;
 protected:
